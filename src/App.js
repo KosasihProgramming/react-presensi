@@ -6,7 +6,7 @@ import Navigation from "./components/Navigation";
 
 function App() {
   return (
-    <div className="bg-gray-500">
+    <div className="bg-gray-200 pb-10">
       <Router>
         <Navigation />
         <Routes>
