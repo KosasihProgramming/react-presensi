@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MUIDataTable from "mui-datatables";
 import axios from "axios";
-import { urlAPI } from "../config/global";
+import { urlAPI } from "../config/Global";
 
 class Home extends Component {
   constructor(props) {
