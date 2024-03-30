@@ -6,13 +6,15 @@ import Navigation from "./components/Navigation";
 
 function App() {
   return (
-    <Router>
-      <Navigation />
-      <Routes>
-        <Route path="/" Component={Home} />
-        <Route path="/shift" Component={Shift} />
-      </Routes>
-    </Router>
+    <div className="bg-gray-500">
+      <Router>
+        <Navigation />
+        <Routes>
+          <Route path="/" Component={Home} />
+          <Route path="/shift" Component={Shift} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 

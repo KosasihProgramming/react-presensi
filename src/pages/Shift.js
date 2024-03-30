@@ -33,7 +33,10 @@ class Home extends Component {
       data.nama_shift,
       data.jam_masuk,
       data.jam_pulang,
-      data.nominal,
+      data.nominal.toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+      }),
     ]);
 
     const columns = ["Nama Shift", "Jam Masuk", "Jam Keluar", "Nominal"];
@@ -48,7 +51,7 @@ class Home extends Component {
     console.log(datas);
     return (
       <div className="container mx-auto mt-2">
-        <div className="rounded-lg bg-white shadow-lg">
+        <div className="rounded-lg bg-white shadow-lg my-5">
           <div className="flex flex-col p-10">
             <h4 className="text-black font-bold text-xl mt-5">
               Form Input Shift
@@ -56,7 +59,7 @@ class Home extends Component {
             <br />
             <hr />
             <br />
-            <div className="flex">
+            <div className="flex mx-auto">
               <form action="">
                 <div className="grid grid-cols-5 gap-4">
                   <input
@@ -64,11 +67,7 @@ class Home extends Component {
                     placeholder="Nama Shift"
                     className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
                   />
-                  <input
-                    type="text"
-                    placeholder="Nama Shift"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
-                  />
+                  <TimePicker label="Basic time picker" />
                   <input
                     type="text"
                     placeholder="Nama Shift"
