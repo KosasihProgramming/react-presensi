@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  .card-presensi {
+    @apply container mx-auto mb-16 mt-5;
+  }
+  .title {
+    @apply font-bold text-blue-500 text-4xl;
+  }
+}

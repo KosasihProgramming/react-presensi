@@ -221,13 +221,13 @@ class Home extends Component {
     const options = {
       selectableRows: false,
       elevation: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 10,
       rowsPerPageOption: [5, 10],
     };
 
     console.log(datas);
     return (
-      <div className="container mx-auto mt-2">
+      <div className="container mx-auto my-16">
         <div className="rounded-lg bg-white shadow-lg my-5">
           <div className="flex flex-col p-10">
             <h4 className="text-black font-bold text-xl mt-5">
@@ -239,12 +239,12 @@ class Home extends Component {
             <div className="flex mx-auto">
               <form action="">
                 <div className="grid grid-cols-5 gap-4">
-                  <input
+                  {/* <input
                     type="number"
                     className="hidden"
                     value={this.state.idShift}
                     readOnly
-                  />
+                  /> */}
                   <input
                     type="text"
                     placeholder="Nama Shift"
