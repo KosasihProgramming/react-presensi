@@ -18,7 +18,7 @@ class Kehadiran extends Component {
 
   getAllDataKehadiran = () => {
     axios
-      .get(urlAPI + "/kehadiran")
+      .get(urlAPI + "/kehadiran/now")
       .then((response) => {
         this.setState({ dataKehadiran: response.data });
         console.log(response.data);
@@ -85,13 +85,13 @@ class Kehadiran extends Component {
     const options = {
       selectableRows: false,
       elevation: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 10,
       rowsPerPageOption: [5, 10],
     };
 
     return (
       <>
-        <div className="container mx-auto my-16 ">
+        <div className="container mx-auto mb-16 mt-5 ">
           <div className="rounded-lg bg-white shadow-lg">
             <div className="flex flex-col p-10">
               <MUIDataTable
