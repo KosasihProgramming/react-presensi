@@ -28,11 +28,13 @@ class Pulang extends Component {
       dendaTelat: 0,
       isPindahKlinik: 1,
       lembur: 0,
+      namaDokter: "",
     };
   }
 
   componentDidMount = () => {
     this.getKehadiran();
+    this.getNamaDokter();
   };
 
   getKehadiran = () => {
@@ -40,9 +42,6 @@ class Pulang extends Component {
       .get(`${urlAPI}/kehadiran/${this.state.idKehadiran}`)
       .then((response) => {
         const data = response.data[0];
-
-        console.log("axios: ", data.barcode);
-        console.log("Inputan: ", this.state.barCode);
 
         this.setState({
           barCode: data.barcode,
@@ -58,6 +57,23 @@ class Pulang extends Component {
           dendaTelat: data.denda_telat,
           isPindahKlinik: data.is_pindah_klinik,
           lembur: data.lembur,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  getNamaDokter = () => {
+    axios
+      .get(`${urlAPI}/barcode/dokter/${this.state.idKehadiran}`)
+      .then((response) => {
+        const dataDokter = response.data[0];
+
+        console.log(dataDokter);
+
+        this.setState({
+          namaDokter: dataDokter.nama,
         });
       })
       .catch((error) => {
@@ -106,7 +122,7 @@ class Pulang extends Component {
               Swal.fire({
                 icon: "success",
                 title: "Berhasil",
-                text: "Data berhasil diperbarui",
+                text: "Berhasil melakukan presensi pulang",
               }).then((result) => {
                 if (result.value) {
                   window.location.href = `/kehadiran`;
@@ -125,61 +141,6 @@ class Pulang extends Component {
       .catch((err) => {
         console.error(err);
       });
-
-    // const waktuSekarang = new Date();
-    // this.state.jamMasuk = konfersiJam(waktuSekarang.toLocaleTimeString());
-    // const foto_pulang = this.webcamRef.current.getScreenshot();
-
-    // const presensiPulang = {
-    //   id_jadwal: idJadwal,
-    //   id_detail_jadwal: idDetailJadwal,
-    //   id_shift: idShift,
-    //   foto_keluar: foto_pulang,
-    // };
-
-    // axios
-    //   .get(urlAPI + `/kehadiran/${idKehadiran}`)
-    //   .then((response) => {
-    //     if (response.data.barcode === this.state.barCode) {
-    //       // Jika tidak ada data yang sesuai dengan idKehadiran
-    //       Swal.fire({
-    //         icon: "error",
-    //         title: "Gagal",
-    //         text: "ID Kehadiran tidak ditemukan",
-    //       });
-    //     } else {
-    //       // Jika ada data yang sesuai dengan idKehadiran, lakukan permintaan PATCH
-    //       axios
-    //         .patch(urlAPI + `/kehadiran/${idKehadiran}`, {
-    //           id_jadwal: idJadwal,
-    //           id_detail_jadwal: idDetailJadwal,
-    //           id_shift: idShift,
-    //           foto_keluar: foto_pulang,
-    //         })
-    //         .then((response) => {
-    //           Swal.fire({
-    //             icon: "success",
-    //             title: "Berhasil",
-    //             text: "Data berhasil diperbarui",
-    //           });
-    //         })
-    //         .catch((err) => {
-    //           Swal.fire({
-    //             icon: "error",
-    //             title: "Gagal",
-    //             text: `${err}`,
-    //           });
-    //         });
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     // Jika idKehadiran tidak ada di database, tampilkan pesan kesalahan dengan SweetAlert
-    //     Swal.fire({
-    //       icon: "error",
-    //       title: "Gagal",
-    //       text: "Terjadi kesalahan saat memuat data",
-    //     });
-    //   });
   };
 
   render() {
@@ -190,6 +151,7 @@ class Pulang extends Component {
             <div className="grid grid-cols-2">
               <div className="flex p-10 h-[70vh] justify-center items-center">
                 <Webcam
+                  className="rounded-3xl"
                   audio={false}
                   ref={this.webcamRef}
                   screenshotFormat="image/jpeg"
@@ -197,8 +159,13 @@ class Pulang extends Component {
               </div>
               <div className="flex flex-col justify-center">
                 <h4 className="title">Presensi pulang</h4>
-                <p>Nama Doketer: Nama dokter</p>
-                <p>Jadwal: jadwla</p>
+                <p className="text-xl">
+                  Nama Doketer:{" "}
+                  <span className="font-bold">{this.state.namaDokter}</span>
+                </p>
+                <p className="text-xl mb-5">
+                  Shift: <span className="font-bold">Shift Pagi</span>
+                </p>
                 <form action="">
                   <div className="flex flex-col gap-4 w-[60%]">
                     <input
