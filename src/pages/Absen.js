@@ -7,6 +7,7 @@ import { konfersiJam } from "../function/konfersiJam";
 import { FiSearch } from "react-icons/fi";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// import { stat } from "fs";
 
 class Absen extends Component {
   constructor(props) {
@@ -22,10 +23,10 @@ class Absen extends Component {
       jamMasuk: "",
       jamKeluar: "",
       durasi: 0,
-      telat: 0,
       dendaTelat: 0,
-      isPindahKlinik: 1,
+      isPindahKlinik: 0,
       lembur: 0,
+      harusMasuk: "",
       dataJadwalHariIni: [],
     };
   }
@@ -106,15 +107,31 @@ class Absen extends Component {
       jamMasuk,
       jamKeluar,
       durasi,
-      telat,
       dendaTelat,
-      isPindahKlinik,
       lembur,
+      harusMasuk,
     } = this.state;
 
     const waktuSekarang = new Date();
     this.state.jamMasuk = konfersiJam(waktuSekarang.toLocaleTimeString());
     const imageSrc = this.webcamRef.current.getScreenshot();
+
+    const [jam, menit] = this.state.harusMasuk.split(":").map(Number);
+
+    const waktuTarget = new Date(
+      waktuSekarang.getFullYear(),
+      waktuSekarang.getMonth(),
+      waktuSekarang.getDate(),
+      jam,
+      menit,
+      0
+    );
+
+    const telat = waktuSekarang - waktuTarget;
+
+    const telatMenit = Math.floor(telat / 60000);
+
+    console.log("telatnya ", telatMenit);
 
     const absenMasuk = {
       barcode: barcode,
@@ -123,9 +140,9 @@ class Absen extends Component {
       id_shift: idShift,
       foto_masuk: imageSrc,
       jam_masuk: jamMasuk,
-      telat: telat,
+      telat: telatMenit,
       denda_telat: dendaTelat,
-      is_pindah_klinik: isPindahKlinik,
+      is_pindah_klinik: 0,
     };
 
     console.log("data: ", absenMasuk);
@@ -156,10 +173,6 @@ class Absen extends Component {
   };
 
   render() {
-    // const dataHariIni = this.state.dataJadwalHariIni.map((data) => {
-    //   return [data.id, data.id_jadwal, data.id_shift];
-    // });
-
     console.log("jadwal hari ini:", this.state.dataJadwalHariIni);
     return (
       <div>
@@ -200,16 +213,41 @@ class Absen extends Component {
                       <select
                         className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                         value={this.state.idDetailJadwal}
-                        onChange={(e) =>
-                          this.setState({ idDetailJadwal: e.target.value })
-                        }>
+                        onChange={(e) => {
+                          // const selectedIdJadwal =
+                          //   this.state.dataJadwalHariIni.find(
+                          //     (data) => data.id === parseInt(e.target.value)
+                          //   ).id_jadwal;
+                          // const selectedIdShift =
+                          //   this.state.dataJadwalHariIni.find(
+                          //     (data) => data.id === parseInt(e.target.value)
+                          //   ).id_shift;
+                          // this.setState({
+                          //   idDetailJadwal: e.target.value,
+                          //   idJadwal: selectedIdJadwal,
+                          //   idShift: selectedIdShift,
+                          // });
+                          const selectedData =
+                            this.state.dataJadwalHariIni.find(
+                              (data) => data.id === parseInt(e.target.value)
+                            );
+                          const selectedIdJadwal = selectedData.id_jadwal;
+                          const selectedIdShift = selectedData.id_shift;
+                          const selectedHarusMasuk = konfersiJam(
+                            selectedData.jam_masuk
+                          );
+                          this.setState({
+                            idDetailJadwal: e.target.value,
+                            idJadwal: selectedIdJadwal,
+                            idShift: selectedIdShift,
+                            harusMasuk: selectedHarusMasuk,
+                          });
+                        }}>
                         <option disabled selected>
                           Pilih Jadwal Anda
                         </option>
                         {this.state.dataJadwalHariIni.map((data) => (
-                          <option value={data.id_shift}>
-                            {data.nama_shift}
-                          </option>
+                          <option value={data.id}>{data.nama_shift}</option>
                         ))}
                       </select>
                     </div>
