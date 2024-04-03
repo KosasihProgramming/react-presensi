@@ -89,6 +89,10 @@ class Home extends Component {
       });
   };
 
+// <<<<<<< branchJadwal
+//   handleEdit = (id_shift) => {
+//     console.log("id: ", id_shift);
+// =======
   handleEdit = (shift) => {
     const { id_shift, nama_shift, jam_masuk, jam_pulang, nominal } = shift;
 
@@ -203,12 +207,21 @@ class Home extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <button
                   className="rounded-lg bg-yellow-400 px-4 py-2 font-bold cursor-pointer hover:bg-yellow-500"
+// <<<<<<< branchJadwal
+//                   onClick={() => this.handleEdit(data.id_shift)}
+//                 >
+// =======
                   onClick={() => this.handleEdit(data)}>
                   Edit
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
-                  onClick={() => this.handleDelete(data.id_shift)}>
+// <<<<<<< branchJadwal
+                  onClick={() => this.handleDelete(data.id_shift)}
+                >
+// =======
+//                   onClick={() => this.handleDelete(data.id_shift)}>
+// >>>>>>> main
                   Hapus
                 </button>
               </div>
@@ -283,6 +296,15 @@ class Home extends Component {
                     onChange={(e) => this.setState({ nominal: e.target.value })}
                     required
                   />
+// <<<<<<< branchJadwal
+//                   <button
+//                     type="submit"
+//                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+//                     onClick={this.handleSave}
+//                   >
+//                     Simpan
+//                   </button>
+// =======
                   {this.state.isEdit ? (
                     <button
                       type="submit"
@@ -298,6 +320,7 @@ class Home extends Component {
                       Simpan
                     </button>
                   )}
+// >>>>>>> main
                 </div>
               </form>
             </div>
