@@ -6,8 +6,9 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 const navList = [
   { name: "Dashboard", href: "/", current: true },
   { name: "Shift", href: "/shift", current: false },
-  { name: "Projects", href: "#", current: false },
-  { name: "Calendar", href: "#", current: false },
+  { name: "Jadwal", href: "/jadwal", current: false },
+  { name: "Kehadiran", href: "/kehadiran", current: false },
+  { name: "Absen", href: "/presensi", current: false },
 ];
 
 function classNames(...classes) {
