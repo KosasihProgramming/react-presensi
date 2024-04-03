@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MUIDataTable from "mui-datatables";
 import axios from "axios";
-import { urlAPI } from "../config/global";
+import { urlAPI } from "../config/Global";
 import Swal from "sweetalert2";
 import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -470,8 +470,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.id}
-                  >
+                    to={"/jadwal/detail-jadwal/" + data.id}>
                     {data.nama}
                   </Link>
                 </div>
@@ -491,8 +490,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.uid}
-                  >
+                    to={"/jadwal/detail-jadwal/" + data.uid}>
                     {data.tanggal}
                   </Link>
                 </div>
@@ -512,8 +510,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.uid}
-                  >
+                    to={"/jadwal/detail-jadwal/" + data.uid}>
                     {data.bulan}
                   </Link>
                 </div>
@@ -533,8 +530,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.uid}
-                  >
+                    to={"/jadwal/detail-jadwal/" + data.uid}>
                     {data.tahun}
                   </Link>
                 </div>
@@ -554,8 +550,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.uid}
-                  >
+                    to={"/jadwal/detail-jadwal/" + data.uid}>
                     {data.jumlah_kehadiran}
                   </Link>
                 </div>
@@ -575,8 +570,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.uid}
-                  >
+                    to={"/jadwal/detail-jadwal/" + data.uid}>
                     {data.jumlah_shift}
                   </Link>
                 </div>
@@ -595,14 +589,12 @@ class JadwalKehadiran extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <button
                   className="rounded-lg bg-yellow-400 px-4 py-2 font-bold cursor-pointer hover:bg-yellow-500"
-                  onClick={() => this.handleUpdateClick(data)}
-                >
+                  onClick={() => this.handleUpdateClick(data)}>
                   Edit
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
-                  onClick={() => this.handleDelete(data.id)}
-                >
+                  onClick={() => this.handleDelete(data.id)}>
                   Hapus
                 </button>
               </div>
@@ -661,8 +653,7 @@ class JadwalKehadiran extends Component {
                         type="text"
                         placeholder="Nama"
                         className="nama-field"
-                        value={this.state.barcode}
-                      >
+                        value={this.state.barcode}>
                         {this.state.barcode}
                       </div>
                     </Form.Group>
@@ -674,8 +665,7 @@ class JadwalKehadiran extends Component {
                         <LocalizationProvider
                           dateAdapter={AdapterDayjs}
                           className="datepicker"
-                          adapterLocale="en-gb"
-                        >
+                          adapterLocale="en-gb">
                           <DatePicker
                             name="tanggalAwal"
                             locale="id"
@@ -700,8 +690,7 @@ class JadwalKehadiran extends Component {
                         <LocalizationProvider
                           dateAdapter={AdapterDayjs}
                           className="datepicker"
-                          adapterLocale="en-gb"
-                        >
+                          adapterLocale="en-gb">
                           <DatePicker
                             name="tanggalAkhir"
                             locale="id"
@@ -723,8 +712,7 @@ class JadwalKehadiran extends Component {
                       <LocalizationProvider
                         dateAdapter={AdapterDayjs}
                         className="datepicker"
-                        adapterLocale="en-gb"
-                      >
+                        adapterLocale="en-gb">
                         <DatePicker
                           name="tahunDate"
                           locale="id"
@@ -743,8 +731,7 @@ class JadwalKehadiran extends Component {
                     type="submit"
                     style={{ marginTop: "2rem" }}
                     className="btn-input btn-15 custom-btn"
-                    onClick={this.handleUpdate}
-                  >
+                    onClick={this.handleUpdate}>
                     Update
                   </button>
                 </div>
@@ -775,8 +762,7 @@ class JadwalKehadiran extends Component {
                         type="text"
                         placeholder="Nama"
                         className="nama-field"
-                        value={this.state.barcode}
-                      >
+                        value={this.state.barcode}>
                         {this.state.barcode}
                       </div>
                     </Form.Group>
@@ -788,8 +774,7 @@ class JadwalKehadiran extends Component {
                         <LocalizationProvider
                           dateAdapter={AdapterDayjs}
                           className="datepicker"
-                          adapterLocale="en-gb"
-                        >
+                          adapterLocale="en-gb">
                           <DatePicker
                             name="tanggalAwal"
                             locale="id"
@@ -814,8 +799,7 @@ class JadwalKehadiran extends Component {
                         <LocalizationProvider
                           dateAdapter={AdapterDayjs}
                           className="datepicker"
-                          adapterLocale="en-gb"
-                        >
+                          adapterLocale="en-gb">
                           <DatePicker
                             name="tanggalAkhir"
                             locale="id"
@@ -837,8 +821,7 @@ class JadwalKehadiran extends Component {
                       <LocalizationProvider
                         dateAdapter={AdapterDayjs}
                         className="datepicker"
-                        adapterLocale="en-gb"
-                      >
+                        adapterLocale="en-gb">
                         <DatePicker
                           name="tahunDate"
                           locale="id"
@@ -856,8 +839,7 @@ class JadwalKehadiran extends Component {
                     type="submit"
                     style={{ marginTop: "2rem" }}
                     className="btn-input btn-15 custom-btn"
-                    onClick={this.handleSubmit}
-                  >
+                    onClick={this.handleSubmit}>
                     Simpan
                   </button>
                 </div>
@@ -868,8 +850,7 @@ class JadwalKehadiran extends Component {
 
         <div
           className="rounded-lg bg-white shadow-lg"
-          style={{ padding: "1rem 0" }}
-        >
+          style={{ padding: "1rem 0" }}>
           <div
             className="flex flex-col p-10"
             style={{
@@ -877,8 +858,7 @@ class JadwalKehadiran extends Component {
               margin: "2rem",
               borderRadius: "8px",
               marginBottom: "2rem",
-            }}
-          >
+            }}>
             <MUIDataTable
               title={"Data Shift"}
               data={dataList}

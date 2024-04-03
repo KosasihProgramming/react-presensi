@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
+/* @layer base {
   .row-table {
-    @apply w-8;
+    @apply w-8; */
 /* styles.css */
 .toast-container {
   z-index: 9999;
