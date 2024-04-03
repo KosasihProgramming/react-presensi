@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MUIDataTable from "mui-datatables";
 import axios from "axios";
-import { urlAPI } from "../config/global";
+import { urlAPI } from "../config/Global";
 import Swal from "sweetalert2";
 
 class Home extends Component {
@@ -9,10 +9,12 @@ class Home extends Component {
     super(props);
     this.state = {
       dataShift: [],
+      idShift: "",
       namaShift: "",
       jamMasuk: "",
       jamPulang: "",
       nominal: "",
+      isEdit: false,
     };
   }
 
@@ -70,6 +72,12 @@ class Home extends Component {
       .post(urlAPI + "/shift", postData)
       .then((response) => {
         this.getAllDataShift();
+        this.setState({
+          namaShift: "",
+          jamMasuk: "",
+          jamPulang: "",
+          nominal: "",
+        });
         Swal.fire({
           icon: "success",
           title: "Berhasil",
@@ -81,8 +89,63 @@ class Home extends Component {
       });
   };
 
-  handleEdit = (id_shift) => {
-    console.log("id: ", id_shift);
+// <<<<<<< branchJadwal
+//   handleEdit = (id_shift) => {
+//     console.log("id: ", id_shift);
+// =======
+  handleEdit = (shift) => {
+    const { id_shift, nama_shift, jam_masuk, jam_pulang, nominal } = shift;
+
+    this.setState({
+      idShift: id_shift,
+      namaShift: nama_shift,
+      jamMasuk: jam_masuk,
+      jamPulang: jam_pulang,
+      nominal: nominal,
+      isEdit: true,
+    });
+  };
+
+  handleUpdate = (e) => {
+    e.preventDefault();
+
+    const { idShift, namaShift, jamMasuk, jamPulang, nominal } = this.state;
+
+    // console.log(idShift);
+
+    const patchData = {
+      nama_shift: namaShift,
+      jam_masuk: jamMasuk,
+      jam_pulang: jamPulang,
+      nominal: nominal,
+    };
+
+    axios
+      .patch(urlAPI + `/shift/${idShift}`, patchData)
+      .then((response) => {
+        this.getAllDataShift();
+        console.log("berhasil update");
+        this.setState({
+          namaShift: "",
+          jamMasuk: "",
+          jamPulang: "",
+          nominal: "",
+          isEdit: false,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Data berhasil diperbarui",
+        });
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: "Gagal memperbarui data",
+        });
+      });
   };
 
   handleDelete = (id_shift) => {
@@ -144,14 +207,21 @@ class Home extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <button
                   className="rounded-lg bg-yellow-400 px-4 py-2 font-bold cursor-pointer hover:bg-yellow-500"
-                  onClick={() => this.handleEdit(data.id_shift)}
-                >
+// <<<<<<< branchJadwal
+//                   onClick={() => this.handleEdit(data.id_shift)}
+//                 >
+// =======
+                  onClick={() => this.handleEdit(data)}>
                   Edit
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
+// <<<<<<< branchJadwal
                   onClick={() => this.handleDelete(data.id_shift)}
                 >
+// =======
+//                   onClick={() => this.handleDelete(data.id_shift)}>
+// >>>>>>> main
                   Hapus
                 </button>
               </div>
@@ -164,13 +234,13 @@ class Home extends Component {
     const options = {
       selectableRows: false,
       elevation: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 10,
       rowsPerPageOption: [5, 10],
     };
 
     console.log(datas);
     return (
-      <div className="container mx-auto mt-2">
+      <div className="container mx-auto my-16">
         <div className="rounded-lg bg-white shadow-lg my-5">
           <div className="flex flex-col p-10">
             <h4 className="text-black font-bold text-xl mt-5">
@@ -182,6 +252,12 @@ class Home extends Component {
             <div className="flex mx-auto">
               <form action="">
                 <div className="grid grid-cols-5 gap-4">
+                  {/* <input
+                    type="number"
+                    className="hidden"
+                    value={this.state.idShift}
+                    readOnly
+                  /> */}
                   <input
                     type="text"
                     placeholder="Nama Shift"
@@ -220,13 +296,31 @@ class Home extends Component {
                     onChange={(e) => this.setState({ nominal: e.target.value })}
                     required
                   />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                    onClick={this.handleSave}
-                  >
-                    Simpan
-                  </button>
+// <<<<<<< branchJadwal
+//                   <button
+//                     type="submit"
+//                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+//                     onClick={this.handleSave}
+//                   >
+//                     Simpan
+//                   </button>
+// =======
+                  {this.state.isEdit ? (
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                      onClick={this.handleUpdate}>
+                      Update
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                      onClick={this.handleSave}>
+                      Simpan
+                    </button>
+                  )}
+// >>>>>>> main
                 </div>
               </form>
             </div>

@@ -5,6 +5,10 @@ import Shift from "./pages/Shift";
 import Navigation from "./components/Navigation";
 import JadwalKehadiran from "./pages/Jadwal";
 import DetailJadwal from "./pages/DetailJadwal";
+import Kehadiran from "./pages/Kehadiran";
+import Absen from "./pages/Absen";
+import Pulang from "./pages/Pulang";
+
 
 function App() {
   return (
@@ -19,6 +23,9 @@ function App() {
             path="/jadwal/detail-jadwal/:idJadwal"
             Component={DetailJadwal}
           />
+          <Route path="/kehadiran" Component={Kehadiran} />
+          <Route path="/presensi" Component={Absen} />
+          <Route path="/pulang/:id_kehadiran" Component={Pulang} />
         </Routes>
       </Router>
     </div>
