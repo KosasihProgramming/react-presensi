@@ -29,6 +29,7 @@ class Pulang extends Component {
       isPindahKlinik: 1,
       lembur: 0,
       namaDokter: "",
+      namaShift: "",
     };
   }
 
@@ -57,6 +58,7 @@ class Pulang extends Component {
           dendaTelat: data.denda_telat,
           isPindahKlinik: data.is_pindah_klinik,
           lembur: data.lembur,
+          namaShift: data.nama_shift,
         });
       })
       .catch((error) => {
@@ -164,7 +166,8 @@ class Pulang extends Component {
                   <span className="font-bold">{this.state.namaDokter}</span>
                 </p>
                 <p className="text-xl mb-5">
-                  Shift: <span className="font-bold">Shift Pagi</span>
+                  Shift:{" "}
+                  <span className="font-bold">{this.state.namaShift}</span>
                 </p>
                 <form action="">
                   <div className="flex flex-col gap-4 w-[60%]">

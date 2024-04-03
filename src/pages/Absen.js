@@ -50,8 +50,11 @@ class Absen extends Component {
       axios
         .get(`${urlAPI}/barcode/jadwal/${barcode}`)
         .then((response) => {
-          if (response.data.length > 0) {
-            this.setState({ dataJadwalHariIni: response.data });
+          if (
+            response.data.jadwal.length > 0 &&
+            response.data.barcode.length > 0
+          ) {
+            this.setState({ dataJadwalHariIni: response.data.jadwal });
             console.log("Jadwal Hari ini: ", response.data);
             toast.success("Jadwal ditemukan", {
               position: "top-right",
@@ -64,7 +67,25 @@ class Absen extends Component {
               theme: "light",
               transition: Bounce,
             });
-          } else {
+          } else if (
+            response.data.jadwal.length == 0 &&
+            response.data.barcode.length == 0
+          ) {
+            toast.error("Barcode tidak ditemukan", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+              transition: Bounce,
+            });
+          } else if (
+            response.data.jadwal.length == 0 &&
+            response.data.barcode.length > 0
+          ) {
             toast.error("Tidak ada jadwal hari ini", {
               position: "top-right",
               autoClose: 5000,
@@ -80,7 +101,7 @@ class Absen extends Component {
         })
         .catch((err) => {
           console.error(err);
-          toast.error("Tidak dapat memprosess", {
+          toast.error("Tidak dapat menemukan barcode", {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -214,19 +235,6 @@ class Absen extends Component {
                         className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                         value={this.state.idDetailJadwal}
                         onChange={(e) => {
-                          // const selectedIdJadwal =
-                          //   this.state.dataJadwalHariIni.find(
-                          //     (data) => data.id === parseInt(e.target.value)
-                          //   ).id_jadwal;
-                          // const selectedIdShift =
-                          //   this.state.dataJadwalHariIni.find(
-                          //     (data) => data.id === parseInt(e.target.value)
-                          //   ).id_shift;
-                          // this.setState({
-                          //   idDetailJadwal: e.target.value,
-                          //   idJadwal: selectedIdJadwal,
-                          //   idShift: selectedIdShift,
-                          // });
                           const selectedData =
                             this.state.dataJadwalHariIni.find(
                               (data) => data.id === parseInt(e.target.value)
@@ -243,9 +251,7 @@ class Absen extends Component {
                             harusMasuk: selectedHarusMasuk,
                           });
                         }}>
-                        <option disabled selected>
-                          Pilih Jadwal Anda
-                        </option>
+                        <option>Pilih Jadwal Anda</option>
                         {this.state.dataJadwalHariIni.map((data) => (
                           <option value={data.id}>{data.nama_shift}</option>
                         ))}
