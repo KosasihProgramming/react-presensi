@@ -26,6 +26,7 @@ class Absen extends Component {
       dendaTelat: 0,
       isPindahKlinik: 1,
       lembur: 0,
+      dataJadwalHariIni: [],
     };
   }
 
@@ -46,9 +47,11 @@ class Absen extends Component {
       });
     } else {
       axios
-        .get(`${urlAPI}/barcode/${barcode}`)
+        .get(`${urlAPI}/barcode/jadwal/${barcode}`)
         .then((response) => {
           if (response.data.length > 0) {
+            this.setState({ dataJadwalHariIni: response.data });
+            console.log("Jadwal Hari ini: ", response.data);
             toast.success("Jadwal ditemukan", {
               position: "top-right",
               autoClose: 5000,
@@ -61,7 +64,7 @@ class Absen extends Component {
               transition: Bounce,
             });
           } else {
-            toast.error("Barcode tidak ditemukan", {
+            toast.error("Tidak ada jadwal hari ini", {
               position: "top-right",
               autoClose: 5000,
               hideProgressBar: false,
@@ -76,6 +79,17 @@ class Absen extends Component {
         })
         .catch((err) => {
           console.error(err);
+          toast.error("Tidak dapat memprosess", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
         });
     }
   };
@@ -142,6 +156,11 @@ class Absen extends Component {
   };
 
   render() {
+    // const dataHariIni = this.state.dataJadwalHariIni.map((data) => {
+    //   return [data.id, data.id_jadwal, data.id_shift];
+    // });
+
+    console.log("jadwal hari ini:", this.state.dataJadwalHariIni);
     return (
       <div>
         <ToastContainer />
@@ -187,8 +206,11 @@ class Absen extends Component {
                         <option disabled selected>
                           Pilih Jadwal Anda
                         </option>
-                        <option value="1">Jadwal 1</option>
-                        <option value="2">Jadwal 2</option>
+                        {this.state.dataJadwalHariIni.map((data) => (
+                          <option value={data.id_shift}>
+                            {data.nama_shift}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div className="flex flex-row gap-4">
