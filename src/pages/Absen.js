@@ -25,6 +25,7 @@ class Absen extends Component {
       durasi: 0,
       dendaTelat: 0,
       isPindahKlinik: 0,
+      isLanjutShift: 0,
       lembur: 0,
       harusMasuk: "",
       dataJadwalHariIni: [],
@@ -116,6 +117,20 @@ class Absen extends Component {
     }
   };
 
+  handleCheckboxChange = (e) => {
+    const isChecked = e.target.checked;
+    this.setState({ isPindahKlinik: isChecked ? 1 : 0 });
+
+    console.log(this.state.isPindahKlinik);
+  };
+
+  handleCheckboxChangeShift = (e) => {
+    const isChecked = e.target.checked;
+    this.setState({ isLanjutShift: isChecked ? 1 : 0 });
+
+    console.log(this.state.isLanjutShift);
+  };
+
   handleSubmit = (e) => {
     e.preventDefault();
     const {
@@ -130,6 +145,7 @@ class Absen extends Component {
       durasi,
       dendaTelat,
       lembur,
+      isPindahKlinik,
       harusMasuk,
     } = this.state;
 
@@ -168,7 +184,7 @@ class Absen extends Component {
       jam_masuk: jamMasuk,
       telat: telatMenit,
       denda_telat: dendaTelat,
-      is_pindah_klinik: 0,
+      is_pindah_klinik: isPindahKlinik,
     };
 
     console.log("data: ", absenMasuk);
@@ -262,13 +278,39 @@ class Absen extends Component {
                         ))}
                       </select>
                     </div>
+                    <div className="flex flex-rows gap-3">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="checkbox"
+                          name="checkbox"
+                          checked={this.state.isPindahKlinik === 1}
+                          onChange={this.handleCheckboxChange}
+                          className="form-checkbox h-5 w-5 text-blue-600"
+                        />
+                        <label
+                          htmlFor="checkbox"
+                          className="ml-2 text-gray-700">
+                          Saya pindah klinik
+                        </label>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="checkboxShift"
+                          name="checkboxShift"
+                          checked={this.state.isLanjutShift === 1}
+                          onChange={this.handleCheckboxChangeShift}
+                          className="form-checkbox h-5 w-5 text-blue-600"
+                        />
+                        <label
+                          htmlFor="checkbox"
+                          className="ml-2 text-gray-700">
+                          Saya lanjut shift
+                        </label>
+                      </div>
+                    </div>
                     <div className="flex flex-row gap-4">
-                      <button
-                        type="reset"
-                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:bg-red-600">
-                        Batal
-                      </button>
-
                       <button
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
