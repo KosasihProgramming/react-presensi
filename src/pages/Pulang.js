@@ -92,7 +92,7 @@ class Pulang extends Component {
       idDetailJadwal,
       idShift,
       fotoKeluar,
-      jamPulang,
+      jamMasuk,
       jamKeluar,
       durasi,
       lembur,
@@ -104,6 +104,8 @@ class Pulang extends Component {
         const data = response.data[0];
         const barcode = data.barcode;
 
+        console.log("data: ", data);
+
         if (barcode != barCode) {
           Swal.fire({
             icon: "error",
@@ -112,12 +114,13 @@ class Pulang extends Component {
           });
         } else {
           const fotoKeluar = this.webcamRef.current.getScreenshot();
-          const waktuSekarang = new Date();
+          const waktuSekarang = new Date(); //jam pulang
           const jamKeluar = konfersiJam(waktuSekarang.toLocaleTimeString());
 
           axios
             .patch(`${urlAPI}/kehadiran/${idKehadiran}`, {
               foto_keluar: fotoKeluar,
+              jam_masuk: this.state.jamMasuk,
               jam_keluar: jamKeluar,
             })
             .then((response) => {

@@ -109,7 +109,7 @@ class Kehadiran extends Component {
       return [
         data.nama,
         data.barcode,
-        data.id_shift,
+        data.nama_shift,
         masukTime,
         pulangTime,
         <img

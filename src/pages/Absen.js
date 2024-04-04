@@ -86,7 +86,7 @@ class Absen extends Component {
             response.data.jadwal.length == 0 &&
             response.data.barcode.length > 0
           ) {
-            toast.error("Tidak ada jadwal hari ini", {
+            toast.warning("Tidak ada jadwal hari ini", {
               position: "top-right",
               autoClose: 5000,
               hideProgressBar: false,
@@ -149,8 +149,13 @@ class Absen extends Component {
     );
 
     const telat = waktuSekarang - waktuTarget;
+    let telatMenit = 0;
 
-    const telatMenit = Math.floor(telat / 60000);
+    if (telat < 0) {
+      telatMenit = 0;
+    } else {
+      telatMenit = Math.floor(telat / 60000);
+    }
 
     console.log("telatnya ", telatMenit);
 
