@@ -4,6 +4,10 @@ import { Component } from "react";
 import { urlAPI } from "../config/Global";
 import { Link } from "react-router-dom";
 import { HiOutlineSelector } from "react-icons/hi";
+import { TextField } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 
 class Kehadiran extends Component {
   constructor(props) {
@@ -12,6 +16,7 @@ class Kehadiran extends Component {
       dataKehadiran: [],
       dataKepulangan: [],
       isSudahPulang: false,
+      tanggalFilter: new Date().toLocaleDateString(),
     };
   }
 
@@ -34,7 +39,7 @@ class Kehadiran extends Component {
 
   getAllDataKepulangan = () => {
     axios
-      .get(`${urlAPI}/kehadiran/pulang/now`)
+      .get(`${urlAPI}/kehadiran/pulang/all`)
       .then((response) => {
         this.setState({ dataKepulangan: response.data });
         console.log("Sudah Pulang: ", response.data);
@@ -47,6 +52,19 @@ class Kehadiran extends Component {
   handleChange = (e) => {
     const value = e.target.value === "Sudah Pulang" ? true : false;
     this.setState({ isSudahPulang: value });
+  };
+
+  handleTanggalFilterChange = (e) => {
+    const tanggalParam = e.target.value;
+    this.setState({ tanggalFilter: tanggalParam });
+    axios
+      .get(`${urlAPI}/kehadiran/filter/${tanggalParam}`)
+      .then((response) => {
+        this.setState({ dataKepulangan: response.data });
+      })
+      .catch((err) => {
+        console.error("Error Fetching data", err);
+      });
   };
 
   render() {
@@ -91,7 +109,7 @@ class Kehadiran extends Component {
       const formatTanggal = `${tanggal}-${bulan}-${tahun}`;
       const formatJam = `${jam}:${menit}:${detik}`;
 
-      const masukTime = `${formatJam} WIB, ${formatTanggal},`;
+      const masukTime = `${formatJam} WIB`;
 
       const pulangDate = new Date(data.jam_keluar);
 
@@ -105,13 +123,14 @@ class Kehadiran extends Component {
       const formatTanggalPulang = `${tanggalPulang}-${bulanPulang}-${tahunPulang}`;
       const formatJamPulang = `${jamPulang}:${menitPulang}:${detikPulang}`;
 
-      const pulangTime = `${formatJamPulang} WIB, ${formatTanggalPulang},`;
+      const pulangTime = `${formatJamPulang} WIB`;
       return [
         data.nama,
         data.barcode,
         data.nama_shift,
         masukTime,
         pulangTime,
+        data.tanggal,
         <img
           className="w-24 rounded-full"
           src={`${urlAPI}/uploads/${data.foto_masuk}`}
@@ -156,6 +175,7 @@ class Kehadiran extends Component {
       "Shift",
       "Jam Masuk",
       "Jam Keluar",
+      "Tanggal",
       "Foto Masuk",
       "Foto Foto Keluar",
     ];
@@ -165,6 +185,7 @@ class Kehadiran extends Component {
       elevation: 0,
       rowsPerPage: 10,
       rowsPerPageOption: [5, 10],
+      filterDate: new Date().toLocaleDateString(),
     };
 
     const { isSudahPulang, dataKehadiran, dataKepulangan } = this.state;
@@ -172,11 +193,13 @@ class Kehadiran extends Component {
     const selectedData = isSudahPulang ? dataKepulangan : dataKehadiran;
     const selectedColumns = isSudahPulang ? columnsPulang : columnsHadir;
 
+    console.log(this.state.tanggalFilter);
+
     return (
       <>
         <div className="container mx-auto mb-16 mt-5 ">
           <div className="rounded-lg bg-white shadow-lg">
-            <div className="w-52 pt-4 ps-6">
+            <div className="flex flex-rows items-center gap-5 pt-4 px-6 ">
               <div className="relative">
                 <select
                   className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white "
@@ -191,6 +214,19 @@ class Kehadiran extends Component {
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <HiOutlineSelector />
                 </div>
+              </div>
+              <div>
+                {/* Filter tanggal */}
+                <input
+                  type="date"
+                  value={this.state.tanggalFilter}
+                  onChange={this.handleTanggalFilterChange}
+                  className={
+                    this.state.isSudahPulang
+                      ? `block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md leading-tight focus:outline-none focus:border-gray-500`
+                      : `hidden`
+                  }
+                />
               </div>
             </div>
             <div className="flex flex-col pb-10 px-7">

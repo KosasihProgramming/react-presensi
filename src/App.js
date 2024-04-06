@@ -8,7 +8,7 @@ import DetailJadwal from "./pages/DetailJadwal";
 import Kehadiran from "./pages/Kehadiran";
 import Absen from "./pages/Absen";
 import Pulang from "./pages/Pulang";
-
+import RekapGajiPerShift from "./pages/RekapGajiPerShift";
 
 function App() {
   return (
@@ -26,6 +26,7 @@ function App() {
           <Route path="/kehadiran" Component={Kehadiran} />
           <Route path="/presensi" Component={Absen} />
           <Route path="/pulang/:id_kehadiran" Component={Pulang} />
+          <Route path="/rekap-gaji" Component={RekapGajiPerShift} />
         </Routes>
       </Router>
     </div>

@@ -144,6 +144,7 @@
 }
 
 .field-table {
+  padding: 12px;
   height: 2rem;
   width: 100%;
   display: flex;
@@ -157,6 +158,7 @@
 }
 
 .row-table {
+  padding: 12px;
   width: 100%;
   height: 2rem;
   display: flex;

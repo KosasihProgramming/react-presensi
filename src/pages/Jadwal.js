@@ -277,7 +277,7 @@ class JadwalKehadiran extends Component {
 
   getBarcode = () => {
     axios
-      .get(urlAPI + "/barcode/data/")
+      .get(urlAPI + "/barcode/")
       .then((response) => {
         console.log(response);
 
@@ -441,6 +441,7 @@ class JadwalKehadiran extends Component {
     // Update state with selected option dynamically based on dropdown name
     let kode = "";
     // Lakukan pencarian berdasarkan kd_dokter
+    console.log(this.state.dataBarcode);
     const barcode = this.state.dataBarcode.find(
       (data) => data.id === selectedOption.value
     );
@@ -470,7 +471,7 @@ class JadwalKehadiran extends Component {
                 <div style={{ width: "100%" }} className="droplink">
                   <Link
                     className="link"
-                    to={"/jadwal/detail-jadwal/" + data.id}>
+                    to={"/jadwal/detail-jadwal/" + data.uid}>
                     {data.nama}
                   </Link>
                 </div>

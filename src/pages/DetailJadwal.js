@@ -20,6 +20,8 @@ import Paper from "@mui/material/Paper";
 import Grow from "@mui/material/Grow";
 import Slide from "@mui/material/Slide";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import { ContactPageSharp } from "@mui/icons-material";
+import { differenceInDays, eachDayOfInterval } from "date-fns";
 
 class DetailJadwal extends Component {
   constructor(props) {
@@ -37,6 +39,7 @@ class DetailJadwal extends Component {
       dataShift: [],
       namaPegawai: "",
       shiftTerpilih: {},
+      judul: [],
       dataJadwal: [],
       isUpdate: false,
       isInput: false,
@@ -54,6 +57,12 @@ class DetailJadwal extends Component {
       tableDetail: true,
       kalenderDetail: false,
       height: "0px",
+      dataExport: [],
+      dataExportDetail: [],
+      startDate: "",
+      endDate: "",
+      kalender: [],
+      dataKalender: [],
     };
     this.containerRef = React.createRef();
   }
@@ -64,6 +73,22 @@ class DetailJadwal extends Component {
     this.getShift();
   };
 
+  getDatesBetween = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysBetween = differenceInDays(end, start) + 1;
+    const datesArray = eachDayOfInterval({ start: start, end: end });
+
+    const formattedDates = datesArray.map((date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Menambahkan angka 0 di depan untuk bulan dengan satu digit
+      const day = String(date.getDate()).padStart(2, "0"); // Menambahkan angka 0 di depan untuk hari dengan satu digit
+      return `${year}/${month}/${day}`;
+    });
+
+    this.setState({ kalender: formattedDates });
+    console.log(formattedDates);
+  };
   handleTab = () => {
     this.setState({ tableDetail: true, kalenderDetail: false });
   };
@@ -176,7 +201,6 @@ class DetailJadwal extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
     const { idShift, idJadwal, tanggal } = this.state;
-
     console.log(idJadwal);
     console.log(idShift);
     console.log(tanggal);
@@ -204,7 +228,7 @@ class DetailJadwal extends Component {
       Swal.fire({
         icon: "error",
         title: "Kesalahan",
-        text: "Periode Jadwal Sudah Ada , Silakan Buat periode Jadwal Lain",
+        text: "Jadwal Sudah Ada , Silakan Buat Jadwal Lain",
       });
       return;
     } else {
@@ -273,13 +297,90 @@ class DetailJadwal extends Component {
           ...item,
           hadir: item.isHadir == 0 ? "Tidak" : "Ya", // Menggunakan operator ternary
         }));
-        this.setState({ dataDetail: newData });
+        const data = newData.map((item) => [
+          item.tanggal,
+          item.nama,
+          item.nama_shift,
+          item.jam_masuk,
+          item.jam_pulang,
+          item.hadir,
+          item.nominal_hadir,
+        ]);
+
+        const dataExportDetail = newData.map((item) => [
+          item.tanggal,
+          item.nama_shift,
+        ]);
+        console.log(data, "jaja");
+        const propertyNames = [
+          "Tanggal",
+          "Nama Dokter",
+          "Shift",
+          "Jam",
+          "",
+          "Hadir",
+          "Nominal",
+        ];
+
+        const propertyNames2 = ["", "", "", "Jam Masuk", "Jam Pulang", "", ""];
+        const newArray = [];
+        for (const obj of data) {
+          const rowValues = Object.values(obj);
+          newArray.push(rowValues);
+        }
+        newArray.unshift(propertyNames2);
+        console.log(newData, "poro");
+        this.setState({
+          dataDetail: newData,
+          judul: propertyNames,
+          dataExport: newArray,
+          dataExportDetail: dataExportDetail,
+        });
       })
+
       .catch((error) => {
         console.log("Error:", error);
       });
   };
 
+  handleExport = () => {
+    const columnHeaders = this.state.judul;
+
+    const csvString = [
+      columnHeaders.join(","),
+      ...this.state.dataExport.map((row) => {
+        const rowValues = Object.values(row).map((value) => `"${value}"`);
+        return rowValues.join(",");
+      }),
+    ].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "dataKehadiran.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  handleExportKalender = (data) => {
+    const columnHeaders = ["Tanggal", "Shift"];
+
+    const csvString = [
+      columnHeaders.join(","),
+      ...data.map((row) => {
+        const rowValues = Object.values(row).map((value) => `"${value}"`);
+        return rowValues.join(",");
+      }),
+    ].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "dataKehadiranKalender.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   getJadwal = () => {
     const idJadwal = this.state.uidJadwal;
     const postData = {
@@ -296,6 +397,8 @@ class DetailJadwal extends Component {
         const tanggalAkhir = this.convertDateFormatString(
           response.data[0].tanggal_akhir
         );
+        const end = response.data[0].tanggal_akhir.replace(/\//g, "-");
+        const start = response.data[0].tanggal_awal.replace(/\//g, "-");
         this.setState({
           datajadwal: response.data[0],
           namaPegawai: response.data[0].nama,
@@ -306,6 +409,7 @@ class DetailJadwal extends Component {
           idJadwal: response.data[0].id,
         });
         this.getDetailJadwal();
+        this.getDatesBetween(start, end);
         console.log("datajadwal", response.data[0]);
       })
       .catch((error) => {
@@ -330,7 +434,7 @@ class DetailJadwal extends Component {
             Swal.fire({
               icon: "success",
               title: "Berhasil",
-              text: "Data berhasil disimpan",
+              text: "Data berhasil di Hapus",
             });
             this.getJadwal();
             this.getDetailJadwal();
@@ -433,9 +537,11 @@ class DetailJadwal extends Component {
       }
     }
   }
+
   render() {
+    // const tanggalNew = new Date(data.tanggal);
+    // const tanggalTarget = tanggalNew.toLocaleDateString().split("T")[0];
     const dataDetail = this.state.dataDetail.map((data) => [
-      // data.id_shift,
       data.tanggal,
       data.nama_shift,
       data.jam_masuk,
@@ -465,7 +571,7 @@ class DetailJadwal extends Component {
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
-                  onClick={() => this.handleDelete(data.id)}>
+                  onClick={() => this.handleDelete(data.detail_jadwal_id)}>
                   Hapus
                 </button>
               </div>
@@ -511,7 +617,68 @@ class DetailJadwal extends Component {
 
     // Mengubah objek hasilGabungan menjadi array
     const kalenderTabel = Object.values(hasilGabungan);
+
+    let tanggalKehadiran = [];
+    kalenderTabel.forEach((item) => {
+      // Cek apakah tanggal dalam objek kehadiran ada di dalam array kalender
+      if (this.state.kalender.includes(item.tanggal)) {
+        // Jika ada, tambahkan objek kehadiran ke variabel tanggalKehadiran
+        let shifts = item.nama_shift.map((shift) => {
+          return { nama: shift };
+        });
+        tanggalKehadiran.push({ tanggal: item.tanggal, nama_shift: shifts });
+      } else {
+        // Jika tidak ada, tambahkan objek libur ke variabel tanggalKehadiran
+        tanggalKehadiran.push({
+          tanggal: item.tanggal,
+          nama_shift: [{ nama: { nama: "Libur" } }],
+        });
+      }
+    });
+
+    // Iterasi setiap tanggal dalam kalender
+    this.state.kalender.forEach((tanggal) => {
+      // Cek apakah tanggal dalam kalender tidak ada dalam variabel kehadiran
+      if (!kalenderTabel.some((item) => item.tanggal === tanggal)) {
+        // Jika tidak ada, tambahkan objek libur ke variabel tanggalKehadiran
+        tanggalKehadiran.push({
+          tanggal: tanggal,
+          nama_shift: [{ nama: { nama: "Libur" } }],
+        });
+      }
+    });
+
+    // Urutkan tanggalKehadiran berdasarkan tanggal
+    const data = tanggalKehadiran.sort(
+      (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
+    );
+
+    // this.setState({ dataKalender });
+
     console.log(kalenderTabel, "kalender");
+
+    console.log(tanggalKehadiran, "data Hadir");
+
+    const columnHeaders = ["tanggal", "Shift", "Jam Masuk", "jam Pulang"];
+    const csvString = [
+      columnHeaders.join(","),
+      ...this.state.dataDetail.map((row) => {
+        const rowValues = Object.values(row).map((value) => `"${value}"`);
+        return rowValues.join(",");
+      }),
+    ].join("\n");
+
+    const handleExport = () => {
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
     return (
       <div className="container mx-auto mt-2">
         <div className="rounded-lg bg-white shadow-lg my-5">
@@ -556,104 +723,19 @@ class DetailJadwal extends Component {
                   <p>9</p>
                 </div>
               </div>
-              <button
-                type="submit"
-                className="btn-input custom-btn btn-15"
-                onClick={this.handleInput}>
-                Tambah Detail Jadwal
-              </button>
+              <div className="btn-group">
+                <button
+                  type="submit"
+                  className="btn-input custom-btn btn-15"
+                  onClick={this.handleInput}>
+                  Tambah Detail Jadwal
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="rounded-lg bg-white shadow-lg my-5">
-          {/* <div className="flex flex-col p-10">
-                <h6 className="title-2">Input Detail Jadwal</h6>
-                <div className="form-input">
-                  <Row
-                    className="form-row"
-                    style={{ justifyContent: "flex-start", gap: "2rem" }}
-                  >
-                    <Form.Group className="form-field">
-                      <Form.Label className="label-text">Shift :</Form.Label>
-                      <div className="dropdown-container">
-                        <Select
-                          onChange={(selectedOption) =>
-                            this.handleSelect("barcodeTerpilih", selectedOption)
-                          }
-                          name="barcodeTerpilih"
-                          inputId="input"
-                          placeholder="Pilih Pegawai..."
-                          options={shiftOptions}
-                          isSearchable={true}
-                        />
-                      </div>
-                    </Form.Group>
-                    <Form.Group className="form-field">
-                      <Form.Label className="label-text">
-                        Jam Masuk :
-                      </Form.Label>
-
-                      <div
-                        type="text"
-                        style={{ width: "10rem" }}
-                        placeholder="Nama"
-                        className="nama-field"
-                        value={this.state.jamMasuk}
-                      >
-                        {this.state.jamMasuk}
-                      </div>
-                    </Form.Group>
-                    '
-                    <Form.Group className="form-field">
-                      <Form.Label className="label-text">
-                        Jam Keluar :
-                      </Form.Label>
-
-                      <div
-                        type="text"
-                        placeholder="Nama"
-                        style={{ width: "10rem" }}
-                        className="nama-field"
-                        value={this.state.jamKeluar}
-                      >
-                        {this.state.jamKeluar}
-                      </div>
-                    </Form.Group>
-                    '
-                    <Form.Group className="form-field">
-                      <Form.Label className="label-text">Tanggal :</Form.Label>
-                      <div className="datepicker">
-                        <LocalizationProvider
-                          dateAdapter={AdapterDayjs}
-                          className="datepicker"
-                          adapterLocale="en-gb"
-                        >
-                          <DatePicker
-                            name="tanggalAwal"
-                            locale="id"
-                            style={{ zIndex: "999999" }}
-                            label="Tanggal Awal"
-                            value={this.state.tanggalDate}
-                            onChange={(selectedDate) =>
-                              this.handleDateChange("tanggalDate", selectedDate)
-                            }
-                            inputFormat="DD/MM/YYYY"
-                          />
-                        </LocalizationProvider>
-                      </div>
-                    </Form.Group>
-                  </Row>
-                  <button
-                    type="submit"
-                    style={{ marginTop: "2rem" }}
-                    className="btn-input btn-15 custom-btn"
-                    onClick={this.handleSubmit}
-                  >
-                    Simpan
-                  </button>
-                </div>
-              </div> */}
           <Box
             sx={{
               width: "100%",
@@ -890,7 +972,15 @@ class DetailJadwal extends Component {
                   margin: "2rem",
                   borderRadius: "8px",
                   marginBottom: "2rem",
+                  padding: "1rem",
                 }}>
+                <button
+                  type="submit"
+                  className="btn-input btn-15 custom-btn"
+                  onClick={this.handleExport}
+                  style={{ marginBottom: "2rem" }}>
+                  Export Data
+                </button>
                 <MUIDataTable
                   title={"Data Detail Jadwal"}
                   data={dataDetail}
@@ -904,31 +994,38 @@ class DetailJadwal extends Component {
           {this.state.kalenderDetail && (
             <>
               <div className="kalender-main">
-                <div className="table-kalender">
-                  {kalenderTabel.map(
-                    (
-                      item,
-                      index // Tambahkan parameter index di sini
-                    ) => (
+                <div
+                  className="table-kalender"
+                  style={{ flexDirection: "column" }}>
+                  <button
+                    type="submit"
+                    className="btn-input btn-15 custom-btn"
+                    style={{ marginBottom: "2rem" }}
+                    onClick={this.handleExportKalender}>
+                    Export Data
+                  </button>
+                  <div className="table-kalender">
+                    {tanggalKehadiran.map((item, index) => (
                       <div className="kalender-content" key={index}>
-                        {" "}
-                        {/* Tambahkan key untuk elemen kalender-content */}
                         <div className="field-table">{item.tanggal}</div>
-                        {/* Menggunakan item.nama_shift karena item adalah satu objek dari kalenderTabel */}
-                        {item.nama_shift.map(
-                          (
-                            shift,
-                            shiftIndex // Tambahkan parameter shiftIndex di sini
-                          ) => (
-                            // Menggunakan key untuk setiap elemen dalam loop
-                            <div className="row-table" key={shiftIndex}>
-                              {shift.nama}
-                            </div>
-                          )
-                        )}
+                        {item.nama_shift.map((shift, shiftIndex) => (
+                          <div
+                            className="row-table"
+                            style={{
+                              backgroundColor:
+                                shift.nama.nama == "Libur"
+                                  ? "#F55050"
+                                  : "white",
+                              color:
+                                shift.nama.nama == "Libur" ? "white" : "black",
+                            }}
+                            key={shiftIndex}>
+                            {shift.nama.nama}
+                          </div>
+                        ))}
                       </div>
-                    )
-                  )}
+                    ))}
+                  </div>
                 </div>
               </div>
             </>

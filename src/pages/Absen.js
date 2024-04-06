@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { Component } from "react";
 import Webcam from "react-webcam";
 import Swal from "sweetalert2";
-import { urlAPI } from "../config/Global";
+import { urlAPI, botTokenTelegram, chatIdTelegram } from "../config/Global";
 import { konfersiJam } from "../function/konfersiJam";
 import { FiSearch } from "react-icons/fi";
 import { ToastContainer, Bounce, toast } from "react-toastify";
@@ -29,8 +29,23 @@ class Absen extends Component {
       lembur: 0,
       harusMasuk: "",
       dataJadwalHariIni: [],
+      namaPegawai: "",
+      namaKlinik: "",
     };
   }
+
+  componentDidMount() {
+    this.getKlinik();
+  }
+
+  getKlinik = async () => {
+    try {
+      const response = await axios.get(`${urlAPI}/klinik`);
+      this.setState({ namaKlinik: response.data[0].nama_instansi });
+    } catch (error) {
+      console.error("Error fetching API", error);
+    }
+  };
 
   handleSearch = (e) => {
     e.preventDefault();
@@ -51,12 +66,15 @@ class Absen extends Component {
       axios
         .get(`${urlAPI}/barcode/jadwal/${barcode}`)
         .then((response) => {
+          // console.log(response.data.barcode);
+          this.setState({
+            dataJadwalHariIni: response.data.jadwal,
+            namaPegawai: response.data.barcode[0].nama,
+          });
           if (
             response.data.jadwal.length > 0 &&
             response.data.barcode.length > 0
           ) {
-            this.setState({ dataJadwalHariIni: response.data.jadwal });
-            console.log("Jadwal Hari ini: ", response.data);
             toast.success("Jadwal ditemukan", {
               position: "top-right",
               autoClose: 5000,
@@ -119,16 +137,37 @@ class Absen extends Component {
 
   handleCheckboxChange = (e) => {
     const isChecked = e.target.checked;
-    this.setState({ isPindahKlinik: isChecked ? 1 : 0 });
-
-    console.log(this.state.isPindahKlinik);
+    this.setState({
+      isPindahKlinik: isChecked ? 1 : 0,
+      isLanjutShift: isChecked ? 0 : this.state.isLanjutShift,
+    });
   };
 
   handleCheckboxChangeShift = (e) => {
     const isChecked = e.target.checked;
-    this.setState({ isLanjutShift: isChecked ? 1 : 0 });
+    this.setState({
+      isLanjutShift: isChecked ? 1 : 0,
+      isPindahKlinik: isChecked ? 0 : this.state.isPindahKlinik,
+    });
+  };
 
-    console.log(this.state.isLanjutShift);
+  sendMessageToTelegram = async (message) => {
+    const botToken = botTokenTelegram;
+    const chatId = chatIdTelegram;
+
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const params = new URLSearchParams({
+      chat_id: chatId,
+      text: message,
+    });
+
+    try {
+      const response = await fetch(`${url}?${params.toString()}`);
+      const data = await response.json();
+      console.log("Message sent:", data);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   handleSubmit = (e) => {
@@ -146,8 +185,13 @@ class Absen extends Component {
       dendaTelat,
       lembur,
       isPindahKlinik,
+      isLanjutShift,
       harusMasuk,
+      namaPegawai,
+      namaKlinik,
     } = this.state;
+
+    const namaInstansi = this.state.namaKlinik;
 
     const waktuSekarang = new Date();
     this.state.jamMasuk = konfersiJam(waktuSekarang.toLocaleTimeString());
@@ -165,15 +209,54 @@ class Absen extends Component {
     );
 
     const telat = waktuSekarang - waktuTarget;
+    const lanjutShift = this.state.isLanjutShift;
+
     let telatMenit = 0;
 
-    if (telat < 0) {
+    if (telat < 0 || lanjutShift == 1) {
       telatMenit = 0;
     } else {
       telatMenit = Math.floor(telat / 60000);
     }
 
+    const pindahKlinik = this.state.isPindahKlinik;
+    let denda = 0;
+
+    if (telatMenit <= 0) {
+      denda = 0;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (telatMenit > 0 && telatMenit <= 4) {
+      denda = 2500;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (telatMenit > 4 && telatMenit <= 14) {
+      denda = 10000;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (telatMenit > 14 && telatMenit <= 29) {
+      denda = 15000;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (telatMenit > 29 && telatMenit <= 44) {
+      denda = 20000;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (telatMenit > 44 && telatMenit <= 59) {
+      denda = 25000;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (telatMenit >= 60) {
+      denda = 50000;
+      const message = `${this.state.namaPegawai} telat masuk selama ${telatMenit} menit, di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    } else if (!idDetailJadwal) {
+      const message = `${this.state.namaPegawai} tidak ada jadwal & berusaha melakukan absen di ${namaInstansi}`;
+      this.sendMessageToTelegram(message);
+    }
+
     console.log("telatnya ", telatMenit);
+    console.log("dendanya: ", denda);
 
     const absenMasuk = {
       barcode: barcode,
@@ -183,8 +266,9 @@ class Absen extends Component {
       foto_masuk: imageSrc,
       jam_masuk: jamMasuk,
       telat: telatMenit,
-      denda_telat: dendaTelat,
+      denda_telat: denda,
       is_pindah_klinik: isPindahKlinik,
+      is_lanjut_shift: isLanjutShift,
     };
 
     console.log("data: ", absenMasuk);
@@ -215,7 +299,8 @@ class Absen extends Component {
   };
 
   render() {
-    console.log("jadwal hari ini:", this.state.dataJadwalHariIni);
+    // console.log("nama: ", this.state.namaKlinik);
+    // console.log("jadwal hari ini:", this.state.dataJadwalHariIni);
     return (
       <div>
         <ToastContainer />
