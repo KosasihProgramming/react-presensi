@@ -653,7 +653,7 @@ class DetailJadwal extends Component {
       (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
     );
 
-    // this.setState({ dataKalender });
+    // this.setState({ dataKalender: data });
 
     console.log(kalenderTabel, "kalender");
 
