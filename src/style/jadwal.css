@@ -182,7 +182,21 @@
   justify-content: flex-start;
   border-radius: 8px;
 }
-
+.label-text {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.bulan-field {
+  border: 1px solid #0d9488;
+  height: 3rem;
+  width: 10rem;
+  padding: 8px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 8px;
+}
 .form-field {
   width: auto;
   display: flex;

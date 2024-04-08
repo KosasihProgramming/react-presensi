@@ -5,6 +5,8 @@ import { urlAPI } from "../config/Global";
 import { differenceInDays, eachDayOfInterval, formatDate } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import Swal from "sweetalert2";
+import { Row, Col, Form, Card, Button } from "react-bootstrap";
+import "../style/jadwal.css";
 
 class RekapGajiPerShift extends Component {
   constructor(props) {
@@ -15,6 +17,9 @@ class RekapGajiPerShift extends Component {
       dataInsentif: 0,
       dataNominal: [],
       bulan: "",
+      judulKolom: [],
+      dataExport: [],
+      isCetak: false,
     };
   }
 
@@ -43,6 +48,8 @@ class RekapGajiPerShift extends Component {
   };
   cekDataInsentif = () => {
     let tahunAwal = this.state.selectedYear;
+    const bulan = this.state.bulan;
+
     const newData = {
       bulan: this.state.bulan,
       tahun: tahunAwal,
@@ -70,7 +77,13 @@ class RekapGajiPerShift extends Component {
             }
           });
         } else {
-          this.getDataInsentif();
+          Swal.fire({
+            icon: "warning",
+            title: "Perhatian",
+            text:
+              "Maaf Data Tidak Ditemukan Pada Periode" +
+              ` ${bulan} ${tahunAwal}`,
+          });
         }
       })
       .catch((error) => {
@@ -92,6 +105,25 @@ class RekapGajiPerShift extends Component {
       .catch((error) => {
         console.log("Error pada tanggal", ":", error);
       });
+  };
+  handleExport = () => {
+    const columnHeaders = this.state.judulKolom;
+
+    const csvString = [
+      columnHeaders.join(","),
+      ...this.state.dataExport.map((row) => {
+        const rowValues = Object.values(row).map((value) => `"${value}"`);
+        return rowValues.join(",");
+      }),
+    ].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "DataPenggajianDokter.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
   hapusDataInsentif = () => {
     let tahunAwal = this.state.selectedYear;
@@ -128,36 +160,61 @@ class RekapGajiPerShift extends Component {
     } else {
       bulanAwal = bulanAwal.toString();
     }
-    const tanggalAwal = `${tahunAwal}-${bulanAwal}-30`;
-    const tanggalAkhir = `${tahunAkhir}-${bulan}-10`;
+    const tanggalAwal = `${tahunAwal}-${bulanAwal}-23`;
+    const tanggalAkhir = `${tahunAkhir}-${bulan}-22`;
 
     const tanggalBanyak = this.getDatesBetween(tanggalAwal, tanggalAkhir);
 
     let newDataNominal = [];
 
-    tanggalBanyak.forEach((tanggalObj) => {
-      const tanggal = tanggalObj.tanggal;
+    const postData = {
+      tanggalRange: tanggalBanyak,
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
 
-      const postData = {
-        tanggal: tanggal,
-        bulan: this.state.bulan,
-        tahun: tahunAwal,
-      };
+    axios
+      .post(urlAPI + "/insentif/nominal", postData)
+      .then((response) => {
+        newDataNominal = newDataNominal.concat(response.data);
+        console.log(response.data, "Insentif");
+        const propertyNames = [
+          "Tanggal",
+          "Nama Shift",
+          "Nama Dokter",
+          "Garansi Fee",
+          "Nominal",
+          "Insentif",
+          "Kekurangan",
+          "Total Gaji",
+        ];
 
-      axios
-        .post(urlAPI + "/insentif/nominal", postData)
-        .then((response) => {
-          newDataNominal = newDataNominal.concat(response.data);
-          console.log(response.data, "Insentif");
-          this.setState({ dataNominal: newDataNominal });
-        })
-        .catch((error) => {
-          console.log("Error pada tanggal", tanggal, ":", error);
+        const data = newDataNominal.map((item) => [
+          item.tanggal,
+          item.nama_shift,
+          item.nama_dokter,
+          this.formatRupiah(item.garansi_fee),
+          this.formatRupiah(item.nominal_shift),
+          this.formatRupiah(item.insentif),
+          this.formatRupiah(item.kekurangan_garansi_fee),
+          this.formatRupiah(item.total_gaji),
+        ]);
+        const newArray = [];
+        for (const obj of data) {
+          const rowValues = Object.values(obj);
+          newArray.push(rowValues);
+        }
+        this.setState({
+          judulKolom: propertyNames,
+          dataExport: newArray,
         });
-    });
+        this.setState({ dataNominal: newDataNominal, isCetak: true });
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
     console.log(newDataNominal);
   };
-
   formatRupiah = (angka) => {
     var rupiah = "";
     var angkaRev = angka.toString().split("").reverse().join("");
@@ -240,13 +297,14 @@ class RekapGajiPerShift extends Component {
               <br />
               <div className="flex">
                 <form action="" className=" w-full">
-                  <div className="flex flex-row items-center">
-                    <div className="flex flex-row items-center mr-4">
-                      <label className="text-gray-700 font-bold mr-2">
+                  <div className="flex flex-row items-center gap-10">
+                    <Form.Group className="form-field">
+                      <Form.Label className="label-text">
                         Pilih Bulan:
-                      </label>
+                      </Form.Label>
+
                       <select
-                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500"
+                        className="bulan-field"
                         id="monthDropdown"
                         onChange={(e) =>
                           this.handleMonthChange(
@@ -264,13 +322,15 @@ class RekapGajiPerShift extends Component {
                           </option>
                         ))}
                       </select>
-                    </div>
-                    <div className="flex flex-row items-center mr-4">
-                      <label className="text-gray-700 font-bold mr-2">
+                    </Form.Group>
+
+                    <Form.Group className="form-field">
+                      <Form.Label className="label-text">
                         Pilih Tahun:
-                      </label>
+                      </Form.Label>
+
                       <select
-                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500"
+                        className="bulan-field"
                         id="yearDropdown"
                         onChange={this.handleYearChange}
                         value={this.state.selectedYear}
@@ -281,15 +341,72 @@ class RekapGajiPerShift extends Component {
                           </option>
                         ))}
                       </select>
-                    </div>
-                    <div className="flex flex-row">
-                      <button
-                        type="submit"
-                        onClick={this.handleSearch}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 flex items-center"
+                    </Form.Group>
+                    <div
+                      className="flex flex-row"
+                      style={{ gap: "1rem", marginTop: "0" }}
+                    >
+                      <div
+                        className="btn-group"
+                        style={{
+                          marginTop: "0",
+                          paddingTop: "0",
+                          alignItems: "center",
+                        }}
                       >
-                        <span className="mr-2">Cari</span> <FiSearch />
-                      </button>
+                        <button
+                          type="submit"
+                          className="btn-input custom-btn btn-15"
+                          onClick={this.handleSearch}
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "1rem",
+                          }}
+                        >
+                          <div className="icon">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="2rem"
+                              height="2rem"
+                              viewBox="0 0 24 24"
+                            >
+                              <g fill="none" stroke="white" stroke-width="2">
+                                <circle cx="11" cy="11" r="7" />
+                                <path stroke-linecap="round" d="m20 20l-3-3" />
+                              </g>
+                            </svg>
+                          </div>
+                          Cari Data
+                        </button>
+                        <button
+                          type="submit"
+                          className="btn-input custom-btn btn-15"
+                          onClick={this.handleExport}
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "1rem",
+                          }}
+                        >
+                          <div className="icon">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="2rem"
+                              height="2rem"
+                              viewBox="0 0 256 256"
+                            >
+                              <g fill="white">
+                                <path d="M208 88h-56V32Z" opacity="0.2" />
+                                <path d="M48 180c0 11 7.18 20 16 20a14.24 14.24 0 0 0 10.22-4.66a8 8 0 0 1 11.56 11.06A30.06 30.06 0 0 1 64 216c-17.65 0-32-16.15-32-36s14.35-36 32-36a30.06 30.06 0 0 1 21.78 9.6a8 8 0 0 1-11.56 11.06A14.24 14.24 0 0 0 64 160c-8.82 0-16 9-16 20m79.6-8.69c-4-1.16-8.14-2.35-10.45-3.84c-1.25-.81-1.23-1-1.12-1.9a4.57 4.57 0 0 1 2-3.67c4.6-3.12 15.34-1.73 19.83-.56a8 8 0 0 0 4.14-15.48c-2.12-.55-21-5.22-32.84 2.76a20.58 20.58 0 0 0-9 14.95c-2 15.88 13.65 20.41 23 23.11c12.06 3.49 13.12 4.92 12.78 7.59c-.31 2.41-1.26 3.34-2.14 3.93c-4.6 3.06-15.17 1.56-19.55.36a8 8 0 0 0-4.31 15.44a61.34 61.34 0 0 0 15.19 2c5.82 0 12.3-1 17.49-4.46a20.82 20.82 0 0 0 9.19-15.23c2.19-17.31-14.32-22.14-24.21-25m83.09-26.84a8 8 0 0 0-10.23 4.84L188 184.21l-12.47-34.9a8 8 0 0 0-15.07 5.38l20 56a8 8 0 0 0 15.07 0l20-56a8 8 0 0 0-4.84-10.22M216 88v24a8 8 0 0 1-16 0V96h-48a8 8 0 0 1-8-8V40H56v72a8 8 0 0 1-16 0V40a16 16 0 0 1 16-16h96a8 8 0 0 1 5.66 2.34l56 56A8 8 0 0 1 216 88m-27.31-8L160 51.31V80Z" />
+                              </g>
+                            </svg>
+                          </div>
+                          Export Data
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </form>
