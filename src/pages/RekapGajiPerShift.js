@@ -84,7 +84,7 @@ class RekapGajiPerShift extends Component {
       tahun: tahunAwal,
     };
     axios
-      .post(urlAPI + "/insentif/data/", newData)
+      .post(urlAPI + "/insentif/cek/data/", newData)
       .then((response) => {
         console.log(response.data, "Insentif");
         this.setState({ dataNominal: response.data });
@@ -149,7 +149,7 @@ class RekapGajiPerShift extends Component {
         .then((response) => {
           newDataNominal = newDataNominal.concat(response.data);
           console.log(response.data, "Insentif");
-          this.getData();
+          this.setState({ dataNominal: newDataNominal });
         })
         .catch((error) => {
           console.log("Error pada tanggal", tanggal, ":", error);
@@ -200,9 +200,9 @@ class RekapGajiPerShift extends Component {
         data.tanggal,
         data.nama_shift,
         data.nama_dokter,
+        this.formatRupiah(data.garansi_fee),
         this.formatRupiah(data.nominal_shift),
         this.formatRupiah(data.insentif),
-        this.formatRupiah(data.garansi_fee),
         this.formatRupiah(data.kekurangan_garansi_fee),
         this.formatRupiah(data.total_gaji),
       ];
@@ -212,9 +212,9 @@ class RekapGajiPerShift extends Component {
       "Tanggal",
       "Nama Shift",
       "Nama Dokter",
+      "Garansi Fee",
       "Nominal",
       "Insentif",
-      "Garansi Fee",
       "Kekurangan",
       "Total Gaji",
     ];
