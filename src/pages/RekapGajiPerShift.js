@@ -4,6 +4,7 @@ import { FiSearch } from "react-icons/fi";
 import { urlAPI } from "../config/Global";
 import { differenceInDays, eachDayOfInterval, formatDate } from "date-fns";
 import MUIDataTable from "mui-datatables";
+import Swal from "sweetalert2";
 
 class RekapGajiPerShift extends Component {
   constructor(props) {
@@ -13,6 +14,7 @@ class RekapGajiPerShift extends Component {
       selectedMonth: "",
       dataInsentif: 0,
       dataNominal: [],
+      bulan: "",
     };
   }
 
@@ -20,8 +22,8 @@ class RekapGajiPerShift extends Component {
     this.setState({ selectedYear: parseInt(e.target.value) });
   };
 
-  handleMonthChange = (e) => {
-    this.setState({ selectedMonth: e.target.value });
+  handleMonthChange = (select) => {
+    this.setState({ selectedMonth: select.value, bulan: select.label });
   };
 
   getDatesBetween = (startDate, endDate) => {
@@ -39,11 +41,80 @@ class RekapGajiPerShift extends Component {
 
     return formattedDates;
   };
-
+  cekDataInsentif = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/insentif/cek/data/", newData)
+      .then((response) => {
+        console.log(response.data, "Insentif");
+        if (response.data.length > 0) {
+          Swal.fire({
+            title: "Perhatian",
+            text: "Apakah Anda Ingin Memperbarui Data",
+            showDenyButton: true,
+            confirmButtonText: "Ya",
+            denyButtonText: "Tidak",
+            customClass: {
+              actions: "my-actions",
+              cancelButton: "order-1 right-gap",
+              confirmButton: "order-2",
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.hapusDataInsentif();
+            } else if (result.isDenied) {
+            }
+          });
+        } else {
+          this.getDataInsentif();
+        }
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+  getData = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/insentif/data/", newData)
+      .then((response) => {
+        console.log(response.data, "Insentif");
+        this.setState({ dataNominal: response.data });
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+  hapusDataInsentif = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/insentif/hapus/data/", newData)
+      .then((response) => {
+        console.log(response.data, "Insentif");
+        this.getDataInsentif();
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
   handleSearch = (e) => {
     e.preventDefault();
-    // console.log(this.state.selectedMonth);
-    // console.log(this.state.selectedYear);
+    this.cekDataInsentif();
+  };
+
+  getDataInsentif = () => {
     const bulan = this.state.selectedMonth;
     let tahunAwal = this.state.selectedYear;
     let bulanAwal = parseInt(bulan) - 1;
@@ -57,8 +128,8 @@ class RekapGajiPerShift extends Component {
     } else {
       bulanAwal = bulanAwal.toString();
     }
-    const tanggalAwal = `${tahunAwal}-${bulanAwal}-23`;
-    const tanggalAkhir = `${tahunAkhir}-${bulan}-22`;
+    const tanggalAwal = `${tahunAwal}-${bulanAwal}-30`;
+    const tanggalAkhir = `${tahunAkhir}-${bulan}-10`;
 
     const tanggalBanyak = this.getDatesBetween(tanggalAwal, tanggalAkhir);
 
@@ -69,20 +140,36 @@ class RekapGajiPerShift extends Component {
 
       const postData = {
         tanggal: tanggal,
+        bulan: this.state.bulan,
+        tahun: tahunAwal,
       };
 
       axios
         .post(urlAPI + "/insentif/nominal", postData)
         .then((response) => {
           newDataNominal = newDataNominal.concat(response.data);
-          this.setState({ dataNominal: newDataNominal });
-          console.log(response.data);
+          console.log(response.data, "Insentif");
+          this.getData();
         })
         .catch((error) => {
           console.log("Error pada tanggal", tanggal, ":", error);
         });
     });
     console.log(newDataNominal);
+  };
+
+  formatRupiah = (angka) => {
+    var rupiah = "";
+    var angkaRev = angka.toString().split("").reverse().join("");
+    for (var i = 0; i < angkaRev.length; i++)
+      if (i % 3 == 0) rupiah += angkaRev.substr(i, 3) + ".";
+    return (
+      "Rp " +
+      rupiah
+        .split("", rupiah.length - 1)
+        .reverse()
+        .join("")
+    );
   };
 
   render() {
@@ -109,10 +196,28 @@ class RekapGajiPerShift extends Component {
     }
 
     const dataNominalList = this.state.dataNominal.map((data) => {
-      return [data.tanggal, data.nama_shift, data.nama, data.nominal];
+      return [
+        data.tanggal,
+        data.nama_shift,
+        data.nama_dokter,
+        this.formatRupiah(data.nominal_shift),
+        this.formatRupiah(data.insentif),
+        this.formatRupiah(data.garansi_fee),
+        this.formatRupiah(data.kekurangan_garansi_fee),
+        this.formatRupiah(data.total_gaji),
+      ];
     });
 
-    const columnsData = ["Tanggal", "Nama Shift", "Nama Dokter", "Nominal"];
+    const columnsData = [
+      "Tanggal",
+      "Nama Shift",
+      "Nama Dokter",
+      "Nominal",
+      "Insentif",
+      "Garansi Fee",
+      "Kekurangan",
+      "Total Gaji",
+    ];
 
     const options = {
       selectableRows: false,
@@ -143,8 +248,15 @@ class RekapGajiPerShift extends Component {
                       <select
                         className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500"
                         id="monthDropdown"
-                        onChange={this.handleMonthChange}
-                        value={this.state.selectedMonth}>
+                        onChange={(e) =>
+                          this.handleMonthChange(
+                            months.find(
+                              (month) => month.value === e.target.value
+                            )
+                          )
+                        }
+                        value={this.state.selectedMonth}
+                      >
                         <option value="">Pilih</option>
                         {months.map((month) => (
                           <option key={month.value} value={month.value}>
@@ -161,7 +273,8 @@ class RekapGajiPerShift extends Component {
                         className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500"
                         id="yearDropdown"
                         onChange={this.handleYearChange}
-                        value={this.state.selectedYear}>
+                        value={this.state.selectedYear}
+                      >
                         {years.map((year) => (
                           <option key={year} value={year}>
                             {year}
@@ -173,7 +286,8 @@ class RekapGajiPerShift extends Component {
                       <button
                         type="submit"
                         onClick={this.handleSearch}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 flex items-center">
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 flex items-center"
+                      >
                         <span className="mr-2">Cari</span> <FiSearch />
                       </button>
                     </div>
