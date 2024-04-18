@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Component } from "react";
-import { FiSearch } from "react-icons/fi";
 import { urlAPI } from "../config/Global";
 import { differenceInDays, eachDayOfInterval, formatDate } from "date-fns";
 import MUIDataTable from "mui-datatables";
@@ -8,8 +7,11 @@ import Swal from "sweetalert2";
 import { Row, Col, Form, Card, Button } from "react-bootstrap";
 import "../style/jadwal.css";
 import LoadingAnimation from "../components/Loading";
+import { FaArrowRight } from "react-icons/fa6";
+import ReactDOMServer from "react-dom/server";
+import ModalInfo from "../components/ModalInfo";
 
-class RekapGajiPerShift extends Component {
+class RekapGajiDokter extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -22,7 +24,14 @@ class RekapGajiPerShift extends Component {
       dataExport: [],
       isCetak: false,
       isDapat: false,
+      dataShift: [],
+      dataPeriode: [],
       loading: false,
+      infoData: [],
+      dataBahan: [],
+      nameInfo: "",
+      showModal: false,
+      hasilPencarian: [],
     };
   }
 
@@ -49,9 +58,78 @@ class RekapGajiPerShift extends Component {
 
     return formattedDates;
   };
+
+  cekData = () => {
+    console.log(this.state.dataShift, "shift");
+    console.log(this.state.dataPeriode, "dokter");
+    const dataShift = this.state.dataShift;
+    const dataTotalGaji = this.state.dataPeriode;
+    if (dataShift.length > 0 && dataTotalGaji.length == 0) {
+      Swal.fire({
+        title: "Perhatian",
+        text: "Apakah Anda Ingin Memperbarui Data",
+        showDenyButton: true,
+        confirmButtonText: "Ya",
+        denyButtonText: "Tidak",
+        customClass: {
+          actions: "my-actions",
+          cancelButton: "order-1 right-gap",
+          confirmButton: "order-2",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.setState({ loading: true });
+          this.hapusShiftData();
+        } else if (result.isDenied) {
+        }
+      });
+    } else if (dataShift.length > 0 && dataTotalGaji.length > 0) {
+      Swal.fire({
+        title: "Perhatian",
+        text: "Apakah Anda Ingin Memperbarui Data",
+        showDenyButton: true,
+        confirmButtonText: "Ya",
+        denyButtonText: "Tidak",
+        customClass: {
+          actions: "my-actions",
+          cancelButton: "order-1 right-gap",
+          confirmButton: "order-2",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.setState({ loading: true });
+          this.hapusSemuaData();
+        } else if (result.isDenied) {
+        }
+      });
+    } else if (dataShift.length == 0 && dataTotalGaji.length > 0) {
+      Swal.fire({
+        title: "Perhatian",
+        text: "Apakah Anda Ingin Memperbarui Data",
+        showDenyButton: true,
+        confirmButtonText: "Ya",
+        denyButtonText: "Tidak",
+        customClass: {
+          actions: "my-actions",
+          cancelButton: "order-1 right-gap",
+          confirmButton: "order-2",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.setState({ loading: true });
+          this.hapusGajiData();
+        } else if (result.isDenied) {
+        }
+      });
+    } else {
+      // this.getDataInsentif();
+    }
+  };
+
   cekDataInsentif = () => {
     let tahunAwal = this.state.selectedYear;
     const bulan = this.state.bulan;
+    let data = [];
 
     const newData = {
       bulan: this.state.bulan,
@@ -60,94 +138,126 @@ class RekapGajiPerShift extends Component {
     axios
       .post(urlAPI + "/insentif/cek/data/", newData)
       .then((response) => {
-        console.log(response.data, "Insentif");
-        if (response.data.length > 0) {
-          Swal.fire({
-            title: "Perhatian",
-            text: "Apakah Anda Ingin Memperbarui Data",
-            showDenyButton: true,
-            confirmButtonText: "Ya",
-            denyButtonText: "Tidak",
-            customClass: {
-              actions: "my-actions",
-              cancelButton: "order-1 right-gap",
-              confirmButton: "order-2",
-            },
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.setState({ loading: true });
-              this.hapusDataInsentif();
-            } else if (result.isDenied) {
-              this.getData();
-            }
-          });
-        }
-        if (response.data.length == 0) {
-          this.getDataInsentif();
-        }
+        this.setState({ dataShift: response.data });
+        this.cekDataTotalGaji();
       })
       .catch((error) => {
         console.log("Error pada tanggal", ":", error);
       });
+    console.log(data, "shifthh");
   };
-  getData = () => {
+
+  cekDataTotalGaji = () => {
     let tahunAwal = this.state.selectedYear;
+    const bulan = this.state.bulan;
+    let data = [];
+
     const newData = {
       bulan: this.state.bulan,
       tahun: tahunAwal,
     };
-
     axios
-      .post(urlAPI + "/insentif/cek/data/", newData)
+      .post(urlAPI + "/total-gaji/cek/data/", newData) //select data semua berdasarkan bulan, tahun
       .then((response) => {
-        console.log(response.data, "Insentif");
-        const data = response.data.map((item) => [
-          item.tanggal,
-          item.nama_shift,
+        this.setState({ dataPeriode: response.data }, () => {
+          this.cekData();
+        });
+        const newDataBaru = response.data.reduce((acc, item) => {
+          acc.push(
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Insentif",
+              jumlah: item.total_data_insentif,
+              total: item.total_insentif,
+            },
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Nominal Sift",
+              jumlah: item.total_data_nominal,
+              total: item.total_nominal,
+            },
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Kekurangan Garansi Fee",
+              jumlah: "",
+              total: item.total_garansi_fee,
+            },
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Denda Telat",
+              jumlah: "",
+              total: item.total_denda_telat,
+            },
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Total Gaji",
+              jumlah: "",
+              total: item.total_gaji_periode,
+            },
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Pajak",
+              jumlah: "",
+              total: item.pajak,
+            },
+            {
+              nama_dokter: item.nama_dokter,
+              variabel: "Total Gaji Bersih",
+              jumlah: "",
+              total: item.gaji_akhir,
+            }
+          );
+          return acc;
+        }, []);
+
+        // console.log(newDataBaru, "data baru");
+
+        const data = newDataBaru.map((item) => [
           item.nama_dokter,
-          this.formatRupiah(item.garansi_fee),
-          this.formatRupiah(item.nominal_shift),
-          this.formatRupiah(item.insentif),
-          this.formatRupiah(item.kekurangan_garansi_fee),
-          this.formatRupiah(item.denda_telat),
-          this.formatRupiah(item.total_gaji),
+          item.variabel,
+          item.jumlah === "" ? "" : item.jumlah,
+          item.total,
         ]);
-        const propertyNames = [
-          "Tanggal",
-          "Nama Shift",
-          "Nama Dokter",
-          // "Nama Dokter Pengganti",
-          "Garansi Fee",
-          "Nominal",
-          "Insentif",
-          "Kekurangan",
-          "Denda Telat",
-          "Total Gaji",
-        ];
+
         const newArray = [];
         for (const obj of data) {
           const rowValues = Object.values(obj);
           newArray.push(rowValues);
         }
+
+        const transformedArray = newArray.map((item) => {
+          const [nama_dokter, variabel, jumlah, total] = item;
+
+          // Jika nama dokter sama dengan elemen sebelumnya, ubah nama dokter menjadi string kosong
+          return [
+            nama_dokter === newArray[newArray.indexOf(item) - 1]?.[0]
+              ? ""
+              : nama_dokter,
+            variabel,
+            jumlah,
+            total,
+          ];
+        });
+
+        console.log(transformedArray, "Tabel Export");
+
+        const propertyNames = ["Nama Dokter", "Variabel", "Jumlah", "Total"];
+
         this.setState({
           judulKolom: propertyNames,
-          dataExport: newArray,
+          dataExport: transformedArray,
         });
-        this.setState({ dataNominal: response.data });
-        if (response.data.length == 0) {
-          Swal.fire({
-            icon: "warning",
-            title: "Perhatian",
-            text:
-              "Maaf Data Tidak Ditemukan Pada Periode" +
-              ` ${this.state.bulan} ${tahunAwal}`,
-          });
-        }
+        this.setState({
+          isCetak: true,
+          loading: false,
+        });
+        console.log(response.data, "cek");
       })
       .catch((error) => {
         console.log("Error pada tanggal", ":", error);
       });
   };
+
   handleExport = (e) => {
     e.preventDefault();
     const columnHeaders = this.state.judulKolom;
@@ -168,6 +278,20 @@ class RekapGajiPerShift extends Component {
     link.click();
     document.body.removeChild(link);
   };
+
+  hapusShiftData = () => {
+    this.hapusDataInsentif();
+    this.getDataInsentif();
+  };
+  hapusGajiData = () => {
+    this.hapusDataTotalGaji();
+    this.getDataInsentif();
+  };
+  hapusSemuaData = () => {
+    this.hapusDataInsentif();
+    this.hapusDataTotalGaji();
+    this.getDataInsentif();
+  };
   hapusDataInsentif = () => {
     let tahunAwal = this.state.selectedYear;
     const newData = {
@@ -178,7 +302,21 @@ class RekapGajiPerShift extends Component {
       .post(urlAPI + "/insentif/hapus/data/", newData)
       .then((response) => {
         console.log(response.data, "Insentif");
-        this.getDataInsentif();
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+  hapusDataTotalGaji = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/total-gaji/delete/data", newData)
+      .then((response) => {
+        console.log(response.data, "");
       })
       .catch((error) => {
         console.log("Error pada tanggal", ":", error);
@@ -223,64 +361,148 @@ class RekapGajiPerShift extends Component {
         if (response.data.length > 0) {
           isDapat = true;
           newDataNominal = newDataNominal.concat(response.data);
-          console.log(response.data, "Insentif");
-          const propertyNames = [
-            "Tanggal",
-            "Nama Shift",
-            "Nama Dokter",
-            // "Nama Dokter Pengganti",
-            "Garansi Fee",
-            "Nominal",
-            "Insentif",
-            "Kekurangan",
-            "Denda Telat",
-            "Total Gaji",
-          ];
+          console.log(newDataNominal, "new Data nominal");
 
-          const data = newDataNominal.map((item) => [
-            item.tanggal,
-            item.nama_shift,
+          const dataBaru = this.hitungTotalNilai(newDataNominal);
+          console.log(dataBaru, "data baru");
+
+          const dataGajiAkhir = dataBaru.map((item) => {
+            const pajak = (((item.total_gaji_periode * 50) / 100) * 5) / 100;
+            const gajiAkhir = item.total_gaji_periode - pajak;
+            item.pajak = pajak;
+            item.gaji_akhir = gajiAkhir;
+
+            return item;
+          });
+          console.log(dataGajiAkhir, "ada pajak");
+          // function insert
+          axios
+            .post(`${urlAPI}/total-gaji/add/data`, dataGajiAkhir)
+            .then((response) => {
+              console.log(response.data, "insert data gaji");
+            })
+            .catch((error) => {
+              console.log("Error:", error);
+            });
+
+          const newDataBaru = dataBaru.reduce((acc, item) => {
+            acc.push(
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Insentif",
+                jumlah: item.total_data_insentif,
+                total: item.total_insentif,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Nominal Sift",
+                jumlah: item.total_data_nominal,
+                total: item.total_nominal,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Kekurangan Garansi Fee",
+                jumlah: "",
+                total: item.total_garansi_fee,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Denda Telat",
+                jumlah: "",
+                total: item.total_denda_telat,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Total Gaji",
+                jumlah: "",
+                total: item.total_gaji_periode,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Pajak",
+                jumlah: "",
+                total: item.pajak,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Total Gaji Bersih",
+                jumlah: "",
+                total: item.gaji_akhir,
+              }
+            );
+            return acc;
+          }, []);
+
+          // console.log(newDataBaru, "data baru");
+
+          const data = newDataBaru.map((item) => [
             item.nama_dokter,
-            // data.nama_dokter_pengganti == "null"
-            //   ? "-"
-            //   : data.nama_dokter_pengganti,
-            this.formatRupiah(item.garansi_fee),
-            this.formatRupiah(item.nominal_shift),
-            this.formatRupiah(item.insentif),
-            this.formatRupiah(item.kekurangan_garansi_fee),
-            this.formatRupiah(item.denda_telat),
-            this.formatRupiah(item.total_gaji),
+            item.variabel,
+            item.jumlah === "" ? "" : item.jumlah,
+            item.total,
           ]);
+
           const newArray = [];
           for (const obj of data) {
             const rowValues = Object.values(obj);
             newArray.push(rowValues);
           }
+
+          const transformedArray = newArray.map((item) => {
+            const [nama_dokter, variabel, jumlah, total] = item;
+
+            // Jika nama dokter sama dengan elemen sebelumnya, ubah nama dokter menjadi string kosong
+            return [
+              nama_dokter === newArray[newArray.indexOf(item) - 1]?.[0]
+                ? ""
+                : nama_dokter,
+              variabel,
+              jumlah,
+              total,
+            ];
+          });
+
+          console.log(transformedArray, "Tabel Export");
+
+          const propertyNames = ["Nama Dokter", "Variabel", "Jumlah", "Total"];
+
           this.setState({
             judulKolom: propertyNames,
-            dataExport: newArray,
+            dataExport: transformedArray,
           });
           this.setState({
             dataNominal: newDataNominal,
+            dataBahan: newDataNominal,
             isCetak: true,
             loading: false,
           });
+
+          this.setState({
+            loading: false,
+          });
         }
-        // if (isDapat == false) {
-        //   Swal.fire({
-        //     icon: "warning",
-        //     title: "Perhatian",
-        //     text:
-        //       "Maaf Data Tidak Ditemukan Pada Periode" +
-        //       ` ${this.state.bulan} ${tahunAwal}`,
-        //   });
-        // }
       })
       .catch((error) => {
         console.log("Error pada tanggal", ":", error);
       });
     console.log(newDataNominal);
   };
+
+  selectTotalGaji = () => {
+    const postData = {
+      bulan: this.state.bulan,
+      tahun: this.state.selectedYear,
+    };
+    axios
+      .post(`${urlAPI}/total-gaji/cek/data`, postData)
+      .then((response) => {
+        console.log(response.data, "select data gaji");
+      })
+      .catch((error) => {
+        console.log("Error fatching data: ", error);
+      });
+  };
+
   formatRupiah = (angka) => {
     var rupiah = "";
     var angkaRev = angka.toString().split("").reverse().join("");
@@ -293,6 +515,73 @@ class RekapGajiPerShift extends Component {
         .reverse()
         .join("")
     );
+  };
+
+  hitungTotalNilai = (arr) => {
+    const result = {};
+    arr.forEach((item) => {
+      const key = item.barcode + item.nama_dokter_pengganti;
+      const existingItem = result[key];
+
+      if (existingItem) {
+        // Jika objek sudah ada, tambahkan nilai baru ke properti yang sesuai
+        existingItem.total_nominal += item.nominal_shift;
+        existingItem.total_data_nominal++;
+        existingItem.total_insentif += item.insentif;
+        existingItem.total_denda_telat += item.denda_telat;
+        // Periksa apakah insentif dari item lebih besar dari 0
+        if (item.insentif > 0) {
+          existingItem.total_data_insentif++;
+        }
+        existingItem.total_garansi_fee += item.kekurangan_garansi_fee;
+        existingItem.total_gaji_periode += item.total_gaji;
+      } else {
+        // Jika objek belum ada, tambahkan objek baru dengan barcode yang sesuai
+        result[key] = {
+          bulan: this.state.bulan,
+          tahun: this.state.selectedYear,
+          barcode: item.barcode,
+          nama_dokter: item.nama_dokter,
+          nama_dokter_pengganti: item.nama_dokter_pengganti,
+          total_data_nominal: 1,
+          total_nominal: item.nominal_shift,
+          total_data_insentif: item.insentif > 0 ? 1 : 0,
+          total_insentif: item.insentif,
+          total_garansi_fee: item.kekurangan_garansi_fee,
+          total_denda_telat: item.denda_telat,
+          total_gaji_periode: item.total_gaji,
+        };
+      }
+    });
+
+    // Ubah objek result menjadi array
+    const output = Object.values(result);
+    // this.hapusDataInsentif();
+    console.log(output, "output");
+    return output;
+  };
+
+  handleInfo = (data, name) => {
+    const { barcode } = data;
+    console.log("barcode: ", barcode);
+    console.log("name: ", name);
+
+    const dataBahan = this.state.dataShift;
+
+    const cariDataDenganBarcode = (barcode) => {
+      const dataDitemukan = dataBahan.filter(
+        (item) => item.barcode === barcode
+      );
+      return dataDitemukan;
+    };
+
+    const hasilPencarian = cariDataDenganBarcode(barcode);
+
+    this.setState({
+      hasilPencarian: hasilPencarian,
+      nameInfo: name,
+      showModal: true,
+    });
   };
 
   render() {
@@ -318,7 +607,7 @@ class RekapGajiPerShift extends Component {
       years.push(year);
     }
 
-    const dataNominalList = this.state.dataNominal.map((data) => {
+    const dataNominalList = this.state.dataPeriode.map((data) => {
       const adaPengganti = data.nama_dokter_pengganti;
       let penggantiClass =
         adaPengganti === ""
@@ -326,40 +615,56 @@ class RekapGajiPerShift extends Component {
           : "rounded-lg bg-yellow-400 px-4 py-2 font-bold text-white";
       let penggantiText =
         adaPengganti === "" ? "Tidak" : data.nama_dokter_pengganti;
-
       return [
-        data.tanggal,
-        data.nama_shift,
         data.nama_dokter,
-        this.formatRupiah(data.garansi_fee),
-        this.formatRupiah(data.nominal_shift),
-        this.formatRupiah(data.insentif),
-        this.formatRupiah(data.kekurangan_garansi_fee),
-        this.formatRupiah(data.denda_telat),
-        this.formatRupiah(data.total_gaji),
         <div className={penggantiClass}>
           <p>{penggantiText}</p>
         </div>,
+        <button
+          onClick={() => this.handleInfo(data, "Shift")}
+          className="cursor-pointer">
+          {data.total_data_nominal}
+        </button>,
+        <button
+          onClick={() => this.handleInfo(data, "Insentif")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_insentif)}
+        </button>,
+
+        this.formatRupiah(data.total_nominal),
+        this.formatRupiah(data.total_garansi_fee),
+        <button
+          onClick={() => this.handleInfo(data, "Telat")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_denda_telat)}
+        </button>,
+        <button
+          onClick={() => this.handleInfo(data, "Telat")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_gaji_periode)}
+        </button>,
+        this.formatRupiah(data.pajak),
+        this.formatRupiah(data.gaji_akhir),
       ];
     });
 
     const columnsData = [
-      "Tanggal",
-      "Nama Shift",
       "Nama Dokter",
-      "Garansi Fee",
-      "Nominal",
-      "Insentif",
-      "Kekurangan",
-      "Denda Telat",
-      "Total Gaji",
       "Dokter Pengganti",
+      "Jumlah Shift",
+      "Total Insentif (A)",
+      "Total Nominal Shift (B)",
+      "Total Kekurangan Garansi Fee (C)",
+      "Total Denda Telat (D)",
+      "Total Gaji (E=(A+B+C)-D)",
+      "Pajak (F)",
+      "Total Gaji (E-F)",
     ];
 
     const options = {
       selectableRows: false,
       elevation: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 15,
       rowsPerPageOption: [5, 10],
       filterDate: new Date().toLocaleDateString(),
     };
@@ -371,6 +676,7 @@ class RekapGajiPerShift extends Component {
             <LoadingAnimation />
           </>
         )}
+
         <div className="container mx-auto mb-16">
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
@@ -502,9 +808,16 @@ class RekapGajiPerShift extends Component {
             </div>
           </div>
         </div>
+
+        <ModalInfo
+          showModal={this.state.showModal}
+          setShowModal={(value) => this.setState({ showModal: value })}
+          data={this.state.hasilPencarian}
+          nameInfo={this.state.nameInfo}
+        />
       </>
     );
   }
 }
 
-export default RekapGajiPerShift;
+export default RekapGajiDokter;

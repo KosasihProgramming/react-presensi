@@ -1,4 +1,4 @@
-// import "./App.css";
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Shift from "./pages/Shift";
@@ -9,6 +9,8 @@ import Kehadiran from "./pages/Kehadiran";
 import Absen from "./pages/Absen";
 import Pulang from "./pages/Pulang";
 import RekapGajiPerShift from "./pages/RekapGajiPerShift";
+import RekapGajiDokter from "./pages/RekapGajiDokter";
+import ModalInfo from "./components/ModalInfo";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           <Route path="/presensi" Component={Absen} />
           <Route path="/pulang/:id_kehadiran" Component={Pulang} />
           <Route path="/rekap-gaji" Component={RekapGajiPerShift} />
+          <Route path="/rekap-gaji-dokter" Component={RekapGajiDokter} />
+          <Route path="/modal-test" Component={ModalInfo} />
         </Routes>
       </Router>
     </div>

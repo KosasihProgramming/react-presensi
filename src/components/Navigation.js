@@ -9,7 +9,8 @@ const navList = [
   { name: "Jadwal", href: "/jadwal-kehadiran", current: false },
   { name: "Kehadiran", href: "/kehadiran", current: false },
   { name: "Absen", href: "/presensi", current: false },
-  { name: "Rekap Gaji", href: "/rekap-gaji", current: false },
+  { name: "Gaji Pershift", href: "/rekap-gaji", current: false },
+  { name: "Gaji Perdokter", href: "/rekap-gaji-dokter", current: false },
 ];
 
 function classNames(...classes) {

@@ -14,6 +14,7 @@ class Home extends Component {
       jamMasuk: "",
       jamPulang: "",
       nominal: "",
+      garansiFee: "",
       isEdit: false,
     };
   }
@@ -36,7 +37,7 @@ class Home extends Component {
 
   handleSave = (e) => {
     e.preventDefault();
-    const { namaShift, jamMasuk, jamPulang, nominal } = this.state;
+    const { namaShift, jamMasuk, jamPulang, nominal, garansiFee } = this.state;
 
     // Cek kelengkapan form
     if (!namaShift || !jamMasuk || !jamPulang || !nominal) {
@@ -53,6 +54,7 @@ class Home extends Component {
       jam_masuk: jamMasuk,
       jam_pulang: jamPulang,
       nominal: nominal,
+      garansi_fee: garansiFee,
     };
 
     // Cek data yang ada sebagai perbandingan
@@ -77,6 +79,7 @@ class Home extends Component {
           jamMasuk: "",
           jamPulang: "",
           nominal: "",
+          garansiFee: "",
         });
         Swal.fire({
           icon: "success",
@@ -94,7 +97,8 @@ class Home extends Component {
   //     console.log("id: ", id_shift);
   // =======
   handleEdit = (shift) => {
-    const { id_shift, nama_shift, jam_masuk, jam_pulang, nominal } = shift;
+    const { id_shift, nama_shift, jam_masuk, jam_pulang, nominal, garansiFee } =
+      shift;
 
     this.setState({
       idShift: id_shift,
@@ -102,6 +106,7 @@ class Home extends Component {
       jamMasuk: jam_masuk,
       jamPulang: jam_pulang,
       nominal: nominal,
+      garansi_fee: garansiFee,
       isEdit: true,
     });
   };
@@ -109,7 +114,8 @@ class Home extends Component {
   handleUpdate = (e) => {
     e.preventDefault();
 
-    const { idShift, namaShift, jamMasuk, jamPulang, nominal } = this.state;
+    const { idShift, namaShift, jamMasuk, jamPulang, nominal, garansiFee } =
+      this.state;
 
     // console.log(idShift);
 
@@ -118,6 +124,7 @@ class Home extends Component {
       jam_masuk: jamMasuk,
       jam_pulang: jamPulang,
       nominal: nominal,
+      garansi_fee: garansiFee,
     };
 
     axios
@@ -130,6 +137,7 @@ class Home extends Component {
           jamMasuk: "",
           jamPulang: "",
           nominal: "",
+          garansiFee: "",
           isEdit: false,
         });
         Swal.fire({
@@ -191,6 +199,10 @@ class Home extends Component {
         style: "currency",
         currency: "IDR",
       }),
+      data.garansi_fee.toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+      }),
     ]);
 
     const columns = [
@@ -198,6 +210,7 @@ class Home extends Component {
       "Jam Masuk",
       "Jam Pulang",
       "Nominal",
+      "Garansi Fee",
       {
         name: "Aksi",
         options: {
@@ -285,6 +298,16 @@ class Home extends Component {
                     className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
                     value={this.state.nominal}
                     onChange={(e) => this.setState({ nominal: e.target.value })}
+                    required
+                  />
+                  <input
+                    type="number"
+                    placeholder="Garansi Fee"
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
+                    value={this.state.garansiFee}
+                    onChange={(e) =>
+                      this.setState({ garansiFee: e.target.value })
+                    }
                     required
                   />
                   {this.state.isEdit ? (
