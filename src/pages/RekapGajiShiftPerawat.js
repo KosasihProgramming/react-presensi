@@ -15,15 +15,234 @@ class RekapGajiShiftPerawat extends Component {
       selectedYear: new Date().getFullYear(),
       selectedMonth: "",
       bulan: "",
+      dataNominal: [],
+      loading: false,
     };
   }
-
   handleYearChange = (e) => {
     this.setState({ selectedYear: parseInt(e.target.value) });
   };
 
   handleMonthChange = (select) => {
     this.setState({ selectedMonth: select.value, bulan: select.label });
+  };
+
+  getDatesBetween = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysBetween = differenceInDays(end, start) + 1;
+    const datesArray = eachDayOfInterval({ start: start, end: end });
+
+    const formattedDates = datesArray.map((date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Menambahkan angka 0 di depan untuk bulan dengan satu digit
+      const day = String(date.getDate()).padStart(2, "0"); // Menambahkan angka 0 di depan untuk hari dengan satu digit
+      return { tanggal: `${year}-${month}-${day}` };
+    });
+
+    return formattedDates;
+  };
+
+  hapusDataInsentif = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/insentif-perawat-gigi/hapus/data/", newData)
+      .then((response) => {
+        console.log(response.data, "Insentif");
+        this.getDataInsentif();
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+
+  handleSearch = (e) => {
+    e.preventDefault();
+    this.cekDataInsentif();
+  };
+
+  cekDataInsentif = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(`${urlAPI}/insentif-perawat-gigi/cek/data/`, newData)
+      .then((response) => {
+        if (response.data.length > 0) {
+          Swal.fire({
+            title: "Perhatian",
+            text: "Apakah Anda Ingin Memperbarui Data",
+            showDenyButton: true,
+            confirmButtonText: "Ya",
+            denyButtonText: "Tidak",
+            customClass: {
+              actions: "my-actions",
+              cancelButton: "order-1 right-gap",
+              confirmButton: "order-2",
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.setState({ loading: true });
+              this.hapusDataInsentif();
+            } else if (result.isDenied) {
+              this.getData();
+            }
+          });
+        }
+        if (response.data.length == 0) {
+          this.getDataInsentif();
+        }
+      });
+  };
+
+  getData = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+
+    axios
+      .post(urlAPI + "/insentif-perawat-gigi/cek/data/", newData)
+      .then((response) => {
+        console.log(response.data, "Insentif");
+        const data = response.data.map((item) => [
+          item.tanggal,
+          item.nama_perawat,
+          item.nama_shift,
+          this.formatRupiah(item.nominal_shift),
+          this.formatRupiah(item.insentif),
+          this.formatRupiah(item.denda_telat),
+          this.formatRupiah(item.total_gaji),
+        ]);
+        const propertyNames = [
+          "Tanggal",
+          "Nama Dokter",
+          "Nama Shift",
+          "Nominal",
+          "Insentif",
+          "Denda Telat",
+          "Total Gaji",
+        ];
+        const newArray = [];
+        for (const obj of data) {
+          const rowValues = Object.values(obj);
+          newArray.push(rowValues);
+        }
+        // this.setState({
+        //   judulKolom: propertyNames,
+        //   dataExport: newArray,
+        // });
+        this.setState({ dataNominal: response.data });
+        if (response.data.length == 0) {
+          Swal.fire({
+            icon: "warning",
+            title: "Perhatian",
+            text:
+              "Maaf Data Tidak Ditemukan Pada Periode" +
+              ` ${this.state.bulan} ${tahunAwal}`,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+
+  getDataInsentif = () => {
+    const bulan = this.state.selectedMonth;
+    let tahunAwal = this.state.selectedYear;
+    let bulanAwal = parseInt(bulan) - 1;
+    let tahunAkhir = this.state.selectedYear;
+
+    if (bulanAwal <= 9 && bulanAwal >= 1) {
+      bulanAwal = bulanAwal.toString().padStart(bulanAwal, "0");
+    } else if (bulanAwal <= 0) {
+      bulanAwal = "12";
+      tahunAwal = parseInt(tahunAkhir) - 1;
+    } else {
+      bulanAwal = bulanAwal.toString();
+    }
+    const tanggalAwal = `${tahunAwal}-${bulanAwal}-23`;
+    const tanggalAkhir = `${tahunAkhir}-${bulan}-22`;
+
+    const tanggalBanyak = this.getDatesBetween(tanggalAwal, tanggalAkhir);
+
+    let newDataNominal = [];
+
+    const postData = {
+      tanggalRange: tanggalBanyak,
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    let isDapat = false;
+
+    axios
+      .post(urlAPI + "/insentif-perawat-gigi/nominal", postData)
+      .then((response) => {
+        if (response.data.length > 0) {
+          isDapat = true;
+          newDataNominal = newDataNominal.concat(response.data);
+          console.log(response.data, "Insentif");
+          const propertyNames = [
+            "Tanggal",
+            "Nama Dokter",
+            "Nama Shift",
+            "Nominal",
+            "Insentif",
+            "Denda Telat",
+            "Total Gaji",
+          ];
+
+          const data = newDataNominal.map((item) => [
+            item.tanggal,
+            item.nama_perawat,
+            item.nama_shift,
+            this.formatRupiah(item.nominal_shift),
+            this.formatRupiah(item.insentif),
+            this.formatRupiah(item.denda_telat),
+            this.formatRupiah(item.total_gaji),
+          ]);
+          const newArray = [];
+          for (const obj of data) {
+            const rowValues = Object.values(obj);
+            newArray.push(rowValues);
+          }
+          // this.setState({
+          //   judulKolom: propertyNames,
+          //   dataExport: newArray,
+          // });
+          this.setState({
+            dataNominal: newDataNominal,
+            // isCetak: true,
+            loading: false,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+    console.log(newDataNominal);
+  };
+
+  formatRupiah = (angka) => {
+    var rupiah = "";
+    var angkaRev = angka.toString().split("").reverse().join("");
+    for (var i = 0; i < angkaRev.length; i++)
+      if (i % 3 == 0) rupiah += angkaRev.substr(i, 3) + ".";
+    return (
+      "Rp " +
+      rupiah
+        .split("", rupiah.length - 1)
+        .reverse()
+        .join("")
+    );
   };
 
   render() {
@@ -49,8 +268,48 @@ class RekapGajiShiftPerawat extends Component {
       years.push(year);
     }
 
+    const dataNominalList = this.state.dataNominal.map((data) => {
+      const denda = data.denda_telat;
+      let styleDenda =
+        denda === 0
+          ? "rounded-lg px-4 py-2 font-bold text-black"
+          : "rounded-lg bg-red-400 px-4 py-2 font-bold text-white";
+      return [
+        data.tanggal,
+        data.nama_perawat,
+        data.nama_shift,
+        this.formatRupiah(data.nominal_shift),
+        this.formatRupiah(data.insentif),
+        <div className={styleDenda}>{this.formatRupiah(data.denda_telat)}</div>,
+        this.formatRupiah(data.total_gaji),
+      ];
+    });
+
+    const columnsData = [
+      "Tanggal",
+      "Nama Perawat",
+      "Nama Shift",
+      "Nominal",
+      "Insentif",
+      "Denda Telat",
+      "Total Gaji",
+    ];
+
+    const options = {
+      selectableRows: false,
+      elevation: 0,
+      rowsPerPage: 10,
+      rowsPerPageOption: [5, 10],
+      filterDate: new Date().toLocaleDateString(),
+    };
+
     return (
       <>
+        {this.state.loading && (
+          <>
+            <LoadingAnimation />
+          </>
+        )}
         <div className="container mx-auto mb-16">
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
@@ -118,7 +377,7 @@ class RekapGajiShiftPerawat extends Component {
                         <button
                           type="submit"
                           className="btn-input custom-btn btn-15"
-                          // onClick={this.handleSearch}
+                          onClick={this.handleSearch}
                           style={{
                             display: "flex",
                             justifyContent: "center",
@@ -173,12 +432,12 @@ class RekapGajiShiftPerawat extends Component {
 
           <div className="rounded-lg bg-white shadow-lg">
             <div className="flex flex-col p-10">
-              {/* <MUIDataTable
+              <MUIDataTable
                 title={"Data Rekap"}
                 data={dataNominalList}
                 columns={columnsData}
                 options={options}
-              /> */}
+              />
             </div>
           </div>
         </div>
