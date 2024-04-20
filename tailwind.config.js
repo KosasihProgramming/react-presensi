@@ -5,4 +5,8 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  purge: {
+    content: ["./src/**/*.{js,jsx,ts,tsx}", "!./src/components/Navbar.js"],
+    // Include any other options you have for purge here
+  },
 };

@@ -11,12 +11,15 @@ import Pulang from "./pages/Pulang";
 import RekapGajiPerShift from "./pages/RekapGajiPerShift";
 import RekapGajiDokter from "./pages/RekapGajiDokter";
 import ModalInfo from "./components/ModalInfo";
+import NavBootstrap from "./components/NavBootstrap";
+import RekapGajiShiftPerawat from "./pages/RekapGajiShiftPerawat";
 
 function App() {
   return (
     <div className="bg-gray-200 pb-10">
       <Router>
         <Navigation />
+        {/* <NavBootstrap /> */}
         <Routes>
           <Route path="/" Component={Home} />
           <Route path="/shift" Component={Shift} />
@@ -30,7 +33,10 @@ function App() {
           <Route path="/pulang/:id_kehadiran" Component={Pulang} />
           <Route path="/rekap-gaji" Component={RekapGajiPerShift} />
           <Route path="/rekap-gaji-dokter" Component={RekapGajiDokter} />
-          <Route path="/modal-test" Component={ModalInfo} />
+          <Route
+            path="/rekap-shift-perawat"
+            Component={RekapGajiShiftPerawat}
+          />
         </Routes>
       </Router>
     </div>

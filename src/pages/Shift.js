@@ -195,14 +195,16 @@ class Home extends Component {
       data.nama_shift,
       data.jam_masuk,
       data.jam_pulang,
-      data.nominal.toLocaleString("id-ID", {
-        style: "currency",
-        currency: "IDR",
-      }),
-      data.garansi_fee.toLocaleString("id-ID", {
-        style: "currency",
-        currency: "IDR",
-      }),
+      data.nominal,
+      // .toLocaleString("id-ID", {
+      //   style: "currency",
+      //   currency: "IDR",
+      // }),
+      data.garansi_fee,
+      // .toLocaleString("id-ID", {
+      //   style: "currency",
+      //   currency: "IDR",
+      // }),
     ]);
 
     const columns = [

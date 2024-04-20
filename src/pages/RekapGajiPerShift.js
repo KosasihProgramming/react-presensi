@@ -228,6 +228,7 @@ class RekapGajiPerShift extends Component {
             "Tanggal",
             "Nama Shift",
             "Nama Dokter",
+            "Jabatan",
             // "Nama Dokter Pengganti",
             "Garansi Fee",
             "Nominal",
@@ -241,8 +242,9 @@ class RekapGajiPerShift extends Component {
             item.tanggal,
             item.nama_shift,
             item.nama_dokter,
-            // data.nama_dokter_pengganti == "null"
-            //   ? "-"
+            item.jbtn,
+            // data.nama_dokter_pengganti == null
+            //   ? null
             //   : data.nama_dokter_pengganti,
             this.formatRupiah(item.garansi_fee),
             this.formatRupiah(item.nominal_shift),
@@ -327,15 +329,29 @@ class RekapGajiPerShift extends Component {
       let penggantiText =
         adaPengganti === "" ? "Tidak" : data.nama_dokter_pengganti;
 
+      const garansiFee = data.kekurangan_garansi_fee;
+      let kurangGaransi =
+        garansiFee === 0
+          ? "rounded-lg px-4 py-2 font-bold text-black"
+          : "rounded-lg bg-red-400 px-4 py-2 font-bold text-white";
+
+      const denda = data.denda_telat;
+      let styleDenda =
+        denda === 0
+          ? "rounded-lg px-4 py-2 font-bold text-black"
+          : "rounded-lg bg-red-400 px-4 py-2 font-bold text-white";
       return [
         data.tanggal,
         data.nama_shift,
         data.nama_dokter,
+        data.jbtn,
         this.formatRupiah(data.garansi_fee),
         this.formatRupiah(data.nominal_shift),
         this.formatRupiah(data.insentif),
-        this.formatRupiah(data.kekurangan_garansi_fee),
-        this.formatRupiah(data.denda_telat),
+        <div className={kurangGaransi}>
+          {this.formatRupiah(data.kekurangan_garansi_fee)}
+        </div>,
+        <div className={styleDenda}>{this.formatRupiah(data.denda_telat)}</div>,
         this.formatRupiah(data.total_gaji),
         <div className={penggantiClass}>
           <p>{penggantiText}</p>
@@ -347,6 +363,7 @@ class RekapGajiPerShift extends Component {
       "Tanggal",
       "Nama Shift",
       "Nama Dokter",
+      "Jabatan",
       "Garansi Fee",
       "Nominal",
       "Insentif",
@@ -359,7 +376,7 @@ class RekapGajiPerShift extends Component {
     const options = {
       selectableRows: false,
       elevation: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 10,
       rowsPerPageOption: [5, 10],
       filterDate: new Date().toLocaleDateString(),
     };

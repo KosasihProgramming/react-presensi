@@ -12,11 +12,49 @@ const ModalInfo = ({ showModal, setShowModal, data, nameInfo }) => {
 
   console.log(data, "data");
 
+  const formatRupiah = (angka) => {
+    var rupiah = "";
+    var angkaRev = angka.toString().split("").reverse().join("");
+    for (var i = 0; i < angkaRev.length; i++)
+      if (i % 3 == 0) rupiah += angkaRev.substr(i, 3) + ".";
+    return (
+      "Rp " +
+      rupiah
+        .split("", rupiah.length - 1)
+        .reverse()
+        .join("")
+    );
+  };
+
+  // untuk tabel dokter pengganti
+  const dataPengganti = data.map((item) => {
+    if (item.nama_dokter_pengganti) {
+      return [
+        item.tanggal,
+        item.nama_dokter_pengganti,
+        item.nama_shift,
+        formatRupiah(item.nominal_shift),
+        formatRupiah(item.insentif),
+        formatRupiah(item.total_gaji),
+      ];
+    } else {
+      return 0;
+    }
+  });
+  const columnsDataPengganti = [
+    "Tanggal",
+    "Nama Dokter Pengganti",
+    "Nama Shift",
+    "Nominal",
+    "Insentif",
+    "Gaji",
+  ];
+
   // Untuk tabel Shift
   const dataShift = data.map((item) => [
     item.tanggal,
     item.nama_shift,
-    item.nominal_shift,
+    formatRupiah(item.nominal_shift),
   ]);
   const columnsDataShift = ["Tanggal", "Nama Shift", "Nominal"];
 
@@ -28,12 +66,15 @@ const ModalInfo = ({ showModal, setShowModal, data, nameInfo }) => {
   const dataDenda = data.map((item) => [
     item.tanggal,
     item.nama_shift,
-    item.denda_telat,
+    formatRupiah(item.denda_telat),
   ]);
   const columnsDataDenda = ["Tanggal", "Nama Shift", "Denda"];
 
   // Untuk tabel Gaji
-  const dataGaji = data.map((item) => [item.tanggal, item.total_gaji]);
+  const dataGaji = data.map((item) => [
+    item.tanggal,
+    formatRupiah(item.total_gaji),
+  ]);
   const columnsDataGaji = ["Tanggal", "Gaji"];
 
   const options = {
@@ -59,6 +100,9 @@ const ModalInfo = ({ showModal, setShowModal, data, nameInfo }) => {
   } else if (nameInfo == "Gaji") {
     dataTabel = dataGaji;
     columns = columnsDataGaji;
+  } else if (nameInfo == "Pengganti") {
+    dataTabel = dataPengganti;
+    columns = columnsDataPengganti;
   }
   return (
     <>
@@ -90,17 +134,17 @@ const ModalInfo = ({ showModal, setShowModal, data, nameInfo }) => {
                 </div>
                 {/*footer*/}
                 <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
-                  <button
+                  {/* <button
                     className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => setShowModal(false)}>
                     Close
-                  </button>
+                  </button> */}
                   <button
-                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                    className="bg-red-500 text-white active:bg-red-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => setShowModal(false)}>
-                    Save Changes
+                    Tutup
                   </button>
                 </div>
               </div>

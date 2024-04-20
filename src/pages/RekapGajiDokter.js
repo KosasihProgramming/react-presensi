@@ -10,6 +10,7 @@ import LoadingAnimation from "../components/Loading";
 import { FaArrowRight } from "react-icons/fa6";
 import ReactDOMServer from "react-dom/server";
 import ModalInfo from "../components/ModalInfo";
+import { HiOutlineSelector } from "react-icons/hi";
 
 class RekapGajiDokter extends Component {
   constructor(props) {
@@ -32,6 +33,11 @@ class RekapGajiDokter extends Component {
       nameInfo: "",
       showModal: false,
       hasilPencarian: [],
+      isDokterGigi: false,
+      dataDokterGigi: [],
+      dataDokterPenggantiShift: [],
+      isFilterDokterPengganti: true,
+      dataGajiAkhirExport: [],
     };
   }
 
@@ -162,53 +168,81 @@ class RekapGajiDokter extends Component {
         this.setState({ dataPeriode: response.data }, () => {
           this.cekData();
         });
-        const newDataBaru = response.data.reduce((acc, item) => {
-          acc.push(
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Insentif",
-              jumlah: item.total_data_insentif,
-              total: item.total_insentif,
-            },
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Nominal Sift",
-              jumlah: item.total_data_nominal,
-              total: item.total_nominal,
-            },
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Kekurangan Garansi Fee",
-              jumlah: "",
-              total: item.total_garansi_fee,
-            },
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Denda Telat",
-              jumlah: "",
-              total: item.total_denda_telat,
-            },
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Total Gaji",
-              jumlah: "",
-              total: item.total_gaji_periode,
-            },
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Pajak",
-              jumlah: "",
-              total: item.pajak,
-            },
-            {
-              nama_dokter: item.nama_dokter,
-              variabel: "Total Gaji Bersih",
-              jumlah: "",
-              total: item.gaji_akhir,
-            }
-          );
-          return acc;
-        }, []);
+        // console.log("Sebelum Export: ", this.state.dataGajiAkhirExport);
+        const newDataBaru = this.state.dataGajiAkhirExport.reduce(
+          (acc, item) => {
+            acc.push(
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Insentif Jaga Dokter",
+                jumlah: item.total_data_insentif,
+                total: item.total_insentif,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Insentif Jaga Dokter Pengganti",
+                jumlah: item.total_data_insentif,
+                total: item.total_insentif,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Total Insentif Jaga Dokter",
+                jumlah: item.total_data_insentif,
+                total: item.total_insentif,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Nominal Sift",
+                jumlah: item.total_data_nominal,
+                total: item.total_nominal,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Nominal Sift Dokter Pengganti",
+                jumlah: item.total_data_nominal,
+                total: item.total_nominal,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Total Nominal Shift Dokter",
+                jumlah: item.total_data_nominal,
+                total: item.total_nominal,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Kekurangan Garansi Fee",
+                jumlah: "",
+                total: item.total_garansi_fee,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Denda Telat",
+                jumlah: "",
+                total: item.total_denda_telat,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Total Gaji",
+                jumlah: "",
+                total: item.total_gaji_periode,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Pajak",
+                jumlah: "",
+                total: item.pajak,
+              },
+              {
+                nama_dokter: item.nama_dokter,
+                variabel: "Total Gaji Bersih",
+                jumlah: "",
+                total: item.gaji_akhir,
+              }
+            );
+            return acc;
+          },
+          []
+        );
 
         // console.log(newDataBaru, "data baru");
 
@@ -238,8 +272,6 @@ class RekapGajiDokter extends Component {
             total,
           ];
         });
-
-        console.log(transformedArray, "Tabel Export");
 
         const propertyNames = ["Nama Dokter", "Variabel", "Jumlah", "Total"];
 
@@ -277,6 +309,7 @@ class RekapGajiDokter extends Component {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    console.log(this.state.dataPeriode, "Ynag mau di export");
   };
 
   hapusShiftData = () => {
@@ -324,6 +357,9 @@ class RekapGajiDokter extends Component {
   };
   handleSearch = (e) => {
     e.preventDefault();
+    this.setState({
+      isFilterDokterPengganti: true,
+    });
     this.cekDataInsentif();
   };
 
@@ -375,6 +411,7 @@ class RekapGajiDokter extends Component {
             return item;
           });
           console.log(dataGajiAkhir, "ada pajak");
+          this.setState({ dataGajiAkhirExport: dataGajiAkhir });
           // function insert
           axios
             .post(`${urlAPI}/total-gaji/add/data`, dataGajiAkhir)
@@ -520,21 +557,36 @@ class RekapGajiDokter extends Component {
   hitungTotalNilai = (arr) => {
     const result = {};
     arr.forEach((item) => {
-      const key = item.barcode + item.nama_dokter_pengganti;
+      const key = item.barcode + item.nama_dokter;
+      const keyGajiPeriode = item.barcode;
       const existingItem = result[key];
+      const existingGaji = result[keyGajiPeriode];
 
       if (existingItem) {
         // Jika objek sudah ada, tambahkan nilai baru ke properti yang sesuai
+        // const mergedNamaDokterPengganti = `${existingItem.nama_dokter_pengganti}, ${item.nama_dokter_pengganti}`;
         existingItem.total_nominal += item.nominal_shift;
         existingItem.total_data_nominal++;
         existingItem.total_insentif += item.insentif;
         existingItem.total_denda_telat += item.denda_telat;
+        existingItem.total_gaji_periode += item.total_gaji;
         // Periksa apakah insentif dari item lebih besar dari 0
         if (item.insentif > 0) {
           existingItem.total_data_insentif++;
         }
+        if (
+          item.nama_dokter_pengganti &&
+          !existingItem.nama_dokter_pengganti.includes(
+            item.nama_dokter_pengganti
+          )
+        ) {
+          existingItem.nama_dokter_pengganti +=
+            ", " + item.nama_dokter_pengganti;
+        }
+        if (item.nama_dokter_pengganti != null) {
+          existingItem.shift_dokter_pengganti++;
+        }
         existingItem.total_garansi_fee += item.kekurangan_garansi_fee;
-        existingItem.total_gaji_periode += item.total_gaji;
       } else {
         // Jika objek belum ada, tambahkan objek baru dengan barcode yang sesuai
         result[key] = {
@@ -542,7 +594,9 @@ class RekapGajiDokter extends Component {
           tahun: this.state.selectedYear,
           barcode: item.barcode,
           nama_dokter: item.nama_dokter,
-          nama_dokter_pengganti: item.nama_dokter_pengganti,
+          jbtn: item.jbtn,
+          nama_dokter_pengganti: item.nama_dokter_pengganti || "",
+          shift_dokter_pengganti: item.nama_dokter_pengganti != null ? 1 : 0,
           total_data_nominal: 1,
           total_nominal: item.nominal_shift,
           total_data_insentif: item.insentif > 0 ? 1 : 0,
@@ -567,6 +621,7 @@ class RekapGajiDokter extends Component {
     console.log("name: ", name);
 
     const dataBahan = this.state.dataShift;
+    console.log("Data bahan", dataBahan);
 
     const cariDataDenganBarcode = (barcode) => {
       const dataDitemukan = dataBahan.filter(
@@ -582,6 +637,45 @@ class RekapGajiDokter extends Component {
       nameInfo: name,
       showModal: true,
     });
+  };
+
+  handleDokterGigi = (e) => {
+    // e.preventDefault();
+    this.setState({
+      isDokterGigi: e.target.value === "true",
+    });
+    const postData = {
+      bulan: this.state.bulan,
+      tahun: this.state.selectedYear,
+    };
+    axios
+      .post(`${urlAPI}/total-gaji/cek/gigi`, postData)
+      .then((response) => {
+        this.setState({ dataDokterGigi: response.data });
+      })
+      .catch((error) => {
+        console.log("Error fatching data: ", error);
+      });
+  };
+
+  handleFilterPengganti = (e) => {
+    e.preventDefault();
+    const postData = {
+      bulan: this.state.bulan,
+      tahun: this.state.selectedYear,
+    };
+    axios
+      .post(`${urlAPI}/insentif/pengganti`, postData)
+      .then((response) => {
+        this.setState({
+          dataDokterPenggantiShift: response.data,
+          isFilterDokterPengganti: false,
+        });
+        console.log(response.data, "filter pengganti");
+      })
+      .catch((error) => {
+        console.log("Error fatching data: ", error);
+      });
   };
 
   render() {
@@ -610,11 +704,54 @@ class RekapGajiDokter extends Component {
     const dataNominalList = this.state.dataPeriode.map((data) => {
       const adaPengganti = data.nama_dokter_pengganti;
       let penggantiClass =
-        adaPengganti === ""
+        adaPengganti === null
+          ? "rounded-lg bg-green-400 px-4 py-2 font-bold text-white"
+          : "rounded-lg bg-yellow-400 px-4 py-2 font-bold text-white cursor-pointer";
+      let penggantiText =
+        adaPengganti === null ? "Tidak" : data.nama_dokter_pengganti;
+      return [
+        data.nama_dokter,
+        <button
+          onClick={() => this.handleInfo(data, "Pengganti")}
+          className={penggantiClass}>
+          <p>{penggantiText}</p>
+        </button>,
+        <button
+          onClick={() => this.handleInfo(data, "Shift")}
+          className="cursor-pointer">
+          {data.total_data_nominal}
+        </button>,
+        <button
+          onClick={() => this.handleInfo(data, "Insentif")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_insentif)}
+        </button>,
+
+        this.formatRupiah(data.total_nominal),
+        this.formatRupiah(data.total_garansi_fee),
+        <button
+          onClick={() => this.handleInfo(data, "Telat")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_denda_telat)}
+        </button>,
+        <button
+          onClick={() => this.handleInfo(data, "Telat")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_gaji_periode)}
+        </button>,
+        this.formatRupiah(data.pajak),
+        this.formatRupiah(data.gaji_akhir),
+      ];
+    });
+
+    const listDokterGigi = this.state.dataDokterGigi.map((data) => {
+      const adaPengganti = data.nama_dokter_pengganti;
+      let penggantiClass =
+        adaPengganti === null
           ? "rounded-lg bg-green-400 px-4 py-2 font-bold text-white"
           : "rounded-lg bg-yellow-400 px-4 py-2 font-bold text-white";
       let penggantiText =
-        adaPengganti === "" ? "Tidak" : data.nama_dokter_pengganti;
+        adaPengganti === null ? "Tidak" : data.nama_dokter_pengganti;
       return [
         data.nama_dokter,
         <div className={penggantiClass}>
@@ -648,6 +785,18 @@ class RekapGajiDokter extends Component {
       ];
     });
 
+    const listFilterDokterPengganti = this.state.dataDokterPenggantiShift.map(
+      (item) => [
+        item.tanggal,
+        item.nama_shift,
+        item.nama_dokter,
+        item.nama_dokter_pengganti,
+        item.nominal_shift,
+        item.insentif,
+        item.total_gaji,
+      ]
+    );
+
     const columnsData = [
       "Nama Dokter",
       "Dokter Pengganti",
@@ -659,6 +808,29 @@ class RekapGajiDokter extends Component {
       "Total Gaji (E=(A+B+C)-D)",
       "Pajak (F)",
       "Total Gaji (E-F)",
+    ];
+
+    const columnsDokterGigi = [
+      "Nama Dokter",
+      "Dokter Pengganti",
+      "Jumlah Shift",
+      "Total Insentif (A)",
+      "Total Nominal Shift (B)",
+      "Total Kekurangan Garansi Fee (C)",
+      "Total Denda Telat (D)",
+      "Total Gaji (E=(A+B+C)-D)",
+      "Pajak (F)",
+      "Total Gaji (E-F)",
+    ];
+
+    const columnsFilterShift = [
+      "Tanggal",
+      "Nama Shift",
+      "Nama Dokter",
+      "Dokter Pengganti",
+      "Nominal",
+      "Insentif",
+      "Total",
     ];
 
     const options = {
@@ -681,7 +853,7 @@ class RekapGajiDokter extends Component {
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
               <h4 className="text-black font-bold text-xl">
-                Cari Rekapan per shift
+                Cari Rekapan Per Periode
               </h4>
               <br />
               <hr />
@@ -765,6 +937,32 @@ class RekapGajiDokter extends Component {
                           </div>
                           Cari Data
                         </button>
+
+                        <button
+                          type="submit"
+                          className="btn-input custom-btn btn-15"
+                          onClick={this.handleFilterPengganti}
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "1rem",
+                          }}>
+                          <div className="icon">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="2rem"
+                              height="2rem"
+                              viewBox="0 0 24 24">
+                              <g fill="none" stroke="white" stroke-width="2">
+                                <circle cx="11" cy="11" r="7" />
+                                <path stroke-linecap="round" d="m20 20l-3-3" />
+                              </g>
+                            </svg>
+                          </div>
+                          Dr Pengganti
+                        </button>
+
                         <button
                           type="submit"
                           className="btn-input custom-btn btn-15"
@@ -798,13 +996,44 @@ class RekapGajiDokter extends Component {
           </div>
 
           <div className="rounded-lg bg-white shadow-lg">
+            <div className="flex flex-rows items-center gap-5 pt-4 px-6">
+              <div className="relative">
+                <select
+                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white "
+                  onChange={this.handleDokterGigi}>
+                  <option value={false}>Dokter Umum</option>
+                  <option value={true}>Dokter Gigi</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <HiOutlineSelector />
+                </div>
+              </div>
+            </div>
             <div className="flex flex-col p-10">
-              <MUIDataTable
-                title={"Data Rekap"}
-                data={dataNominalList}
-                columns={columnsData}
-                options={options}
-              />
+              {this.state.isFilterDokterPengganti ? (
+                this.state.isDokterGigi ? (
+                  <MUIDataTable
+                    title={"Data Rekap Dokter Gigi"}
+                    data={listDokterGigi}
+                    columns={columnsDokterGigi}
+                    options={options}
+                  />
+                ) : (
+                  <MUIDataTable
+                    title={"Data Rekap"}
+                    data={dataNominalList}
+                    columns={columnsData}
+                    options={options}
+                  />
+                )
+              ) : (
+                <MUIDataTable
+                  title={"Data Dokter Pengganti"}
+                  data={listFilterDokterPengganti}
+                  columns={columnsFilterShift}
+                  options={options}
+                />
+              )}
             </div>
           </div>
         </div>

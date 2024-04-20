@@ -655,14 +655,12 @@ class DetailJadwal extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <button
                   className="rounded-lg bg-yellow-400 px-4 py-2 font-bold cursor-pointer hover:bg-yellow-500"
-                  onClick={() => this.handleUpdateClick(data)}
-                >
+                  onClick={() => this.handleUpdateClick(data)}>
                   Edit
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
-                  onClick={() => this.handleDelete(data.detail_jadwal_id)}
-                >
+                  onClick={() => this.handleDelete(data.detail_jadwal_id)}>
                   Hapus
                 </button>
               </div>
@@ -691,7 +689,7 @@ class DetailJadwal extends Component {
             <div className="detail-card-main">
               <div className="detail-card-main-body">
                 <div className="detail-body-content-1">
-                  <h5>{this.state.namaPegawai}</h5>
+                  <h4>{this.state.namaPegawai}</h4>
                   <h3 className="card-title">
                     Jadwal Periode Bulan {this.state.bulan} Tahun{" "}
                     {this.state.tahun}
@@ -732,8 +730,7 @@ class DetailJadwal extends Component {
                 <button
                   type="submit"
                   className="btn-input custom-btn btn-15"
-                  onClick={this.handleInput}
-                >
+                  onClick={this.handleInput}>
                   Tambah Detail Jadwal
                 </button>
               </div>
@@ -751,21 +748,17 @@ class DetailJadwal extends Component {
               backgroundColor: "background.default",
               height: this.state.isInput ? "auto" : this.state.height,
             }}
-            className="rounded-lg bg-white shadow-lg my-5"
-          >
+            className="rounded-lg bg-white shadow-lg my-5">
             <Box
-              sx={{ p: 2, height: "auto", overflow: "hidden" }}
-              ref={this.containerRef}
-            >
+              sx={{ p: 2, height: "auto", overflowY: "scroll" }}
+              ref={this.containerRef}>
               <Slide
                 in={this.state.isInput}
-                container={this.containerRef.current}
-              >
+                container={this.containerRef.current}>
                 {
                   <div
                     className="flex flex-col p-10"
-                    style={{ backgroundColor: "white" }}
-                  >
+                    style={{ backgroundColor: "white" }}>
                     <h6 className="title-2">Input Detail Jadwal</h6>
                     <div className="form-input">
                       <Row
@@ -773,8 +766,7 @@ class DetailJadwal extends Component {
                         style={{
                           justifyContent: "flex-start",
                           gap: "2rem",
-                        }}
-                      >
+                        }}>
                         <Form.Group className="form-field">
                           <Form.Label className="label-text">
                             Shift :
@@ -805,8 +797,7 @@ class DetailJadwal extends Component {
                             style={{ width: "10rem" }}
                             placeholder="Nama"
                             className="nama-field"
-                            value={this.state.jamMasuk}
-                          >
+                            value={this.state.jamMasuk}>
                             {this.state.jamMasuk}
                           </div>
                         </Form.Group>
@@ -821,8 +812,7 @@ class DetailJadwal extends Component {
                             placeholder="Nama"
                             style={{ width: "10rem" }}
                             className="nama-field"
-                            value={this.state.jamKeluar}
-                          >
+                            value={this.state.jamKeluar}>
                             {this.state.jamKeluar}
                           </div>
                         </Form.Group>
@@ -835,8 +825,7 @@ class DetailJadwal extends Component {
                             <LocalizationProvider
                               dateAdapter={AdapterDayjs}
                               className="datepicker"
-                              adapterLocale="en-gb"
-                            >
+                              adapterLocale="en-gb">
                               <DatePicker
                                 name="tanggalAwal"
                                 locale="id"
@@ -859,8 +848,7 @@ class DetailJadwal extends Component {
                         type="submit"
                         style={{ marginTop: "2rem" }}
                         className="btn-input btn-15 custom-btn"
-                        onClick={this.handleSubmit}
-                      >
+                        onClick={this.handleSubmit}>
                         Simpan
                       </button>
                     </div>
@@ -879,8 +867,7 @@ class DetailJadwal extends Component {
                 <div className="form-input">
                   <Row
                     className="form-row"
-                    style={{ justifyContent: "flex-start", gap: "2rem" }}
-                  >
+                    style={{ justifyContent: "flex-start", gap: "2rem" }}>
                     <Form.Group className="form-field">
                       <Form.Label className="label-text">Shift :</Form.Label>
                       <div className="dropdown-container">
@@ -907,8 +894,7 @@ class DetailJadwal extends Component {
                         style={{ width: "10rem" }}
                         placeholder="Nama"
                         className="nama-field"
-                        value={this.state.jamMasuk}
-                      >
+                        value={this.state.jamMasuk}>
                         {this.state.jamMasuk}
                       </div>
                     </Form.Group>
@@ -923,8 +909,7 @@ class DetailJadwal extends Component {
                         placeholder="Nama"
                         style={{ width: "10rem" }}
                         className="nama-field"
-                        value={this.state.jamKeluar}
-                      >
+                        value={this.state.jamKeluar}>
                         {this.state.jamKeluar}
                       </div>
                     </Form.Group>
@@ -935,8 +920,7 @@ class DetailJadwal extends Component {
                         <LocalizationProvider
                           dateAdapter={AdapterDayjs}
                           className="datepicker"
-                          adapterLocale="en-gb"
-                        >
+                          adapterLocale="en-gb">
                           <DatePicker
                             name="tanggalDate"
                             locale="id"
@@ -956,8 +940,7 @@ class DetailJadwal extends Component {
                     type="submit"
                     style={{ marginTop: "2rem" }}
                     className="btn-input btn-15 custom-btn"
-                    onClick={this.handleUpdate}
-                  >
+                    onClick={this.handleUpdate}>
                     Update
                   </button>
                 </div>
@@ -968,21 +951,18 @@ class DetailJadwal extends Component {
 
         <div
           className="rounded-lg bg-white shadow-lg"
-          style={{ paddingBottom: "1rem" }}
-        >
+          style={{ paddingBottom: "1rem" }}>
           <div className="btn-group">
             <button
               type="submit"
               className="btn-input custom-btn btn-15"
-              onClick={this.handleTab}
-            >
+              onClick={this.handleTab}>
               Tabel Detail Jadwal
             </button>
             <button
               type="submit"
               className="btn-input custom-btn btn-15"
-              onClick={this.handleTab2}
-            >
+              onClick={this.handleTab2}>
               Kalender Detail Jadwal
             </button>
           </div>
@@ -996,14 +976,12 @@ class DetailJadwal extends Component {
                   borderRadius: "8px",
                   marginBottom: "2rem",
                   padding: "1rem",
-                }}
-              >
+                }}>
                 <button
                   type="submit"
                   className="btn-input btn-15 custom-btn"
                   onClick={this.handleExport}
-                  style={{ marginBottom: "2rem" }}
-                >
+                  style={{ marginBottom: "2rem" }}>
                   Export Data
                 </button>
                 <MUIDataTable
@@ -1021,14 +999,12 @@ class DetailJadwal extends Component {
               <div className="kalender-main">
                 <div
                   className="table-kalender"
-                  style={{ flexDirection: "column" }}
-                >
+                  style={{ flexDirection: "column" }}>
                   <button
                     type="submit"
                     className="btn-input btn-15 custom-btn"
                     style={{ marginBottom: "2rem" }}
-                    onClick={this.handleExportKalender}
-                  >
+                    onClick={this.handleExportKalender}>
                     Export Data
                   </button>
                   <div className="table-kalender">
@@ -1046,8 +1022,7 @@ class DetailJadwal extends Component {
                               color:
                                 shift.nama.nama == "Libur" ? "white" : "black",
                             }}
-                            key={shiftIndex}
-                          >
+                            key={shiftIndex}>
                             {shift.nama.nama}
                           </div>
                         ))}

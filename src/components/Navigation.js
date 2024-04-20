@@ -2,15 +2,26 @@ import { Link } from "react-router-dom";
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { IoIosArrowDown } from "react-icons/io";
+import { useState } from "react";
 
 const navList = [
-  { name: "Dashboard", href: "/", current: true },
   { name: "Shift", href: "/shift", current: false },
   { name: "Jadwal", href: "/jadwal-kehadiran", current: false },
   { name: "Kehadiran", href: "/kehadiran", current: false },
   { name: "Absen", href: "/presensi", current: false },
   { name: "Gaji Pershift", href: "/rekap-gaji", current: false },
   { name: "Gaji Perdokter", href: "/rekap-gaji-dokter", current: false },
+  {
+    name: "Shift Perawat",
+    href: "/rekap-shift-perawat",
+    current: false,
+  },
+  {
+    name: "Rekap Gaji Perawat",
+    href: "/rekap-gaji-perawat",
+    current: false,
+  },
 ];
 
 function classNames(...classes) {
@@ -18,6 +29,12 @@ function classNames(...classes) {
 }
 
 const Navigation = () => {
+  const [dropdown, setDropdown] = useState(false);
+
+  const handleDropdown = () => {
+    console.log("pencet");
+    setDropdown(!dropdown);
+  };
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -60,20 +77,107 @@ const Navigation = () => {
                         {item.name}
                       </Link>
                     ))}
+                    {/* <button
+                      onClick={handleDropdown}
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">
+                      Rekap Gaji
+                    </button> */}
+                    {/* Dropdown menu */}
+                    {/* {dropdown && (
+                      <div className="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+                        <ul
+                          className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                          aria-labelledby="dropdownLargeButton">
+                          <li>
+                            <a
+                              href="#"
+                              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                              Dashboard
+                            </a>
+                          </li>
+                          <li aria-labelledby="dropdownNavbarLink">
+                            <button
+                              id="doubleDropdownButton"
+                              data-dropdown-toggle="doubleDropdown"
+                              data-dropdown-placement="right-start"
+                              type="button"
+                              className="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                              Dropdown
+                              <svg
+                                className="w-2.5 h-2.5 ms-2.5"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 10 6">
+                                <path
+                                  stroke="currentColor"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="m1 1 4 4 4-4"
+                                />
+                              </svg>
+                            </button>
+                            <div
+                              id="doubleDropdown"
+                              className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                              <ul
+                                className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                                aria-labelledby="doubleDropdownButton">
+                                <li>
+                                  <a
+                                    href="#"
+                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                                    Overview
+                                  </a>
+                                </li>
+                                <li>
+                                  <a
+                                    href="#"
+                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                                    My downloads
+                                  </a>
+                                </li>
+                                <li>
+                                  <a
+                                    href="#"
+                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                                    Billing
+                                  </a>
+                                </li>
+                                <li>
+                                  <a
+                                    href="#"
+                                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                                    Rewards
+                                  </a>
+                                </li>
+                              </ul>
+                            </div>
+                          </li>
+                          <li>
+                            <a
+                              href="#"
+                              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                              Earnings
+                            </a>
+                          </li>
+                        </ul>
+                        <div className="py-1">
+                          <a
+                            href="#"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                            Sign out
+                          </a>
+                        </div>
+                      </div>
+                    )}{" "} */}
                   </div>
                 </div>
               </div>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                <button
-                  type="button"
-                  className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-
                 {/* Profile dropdown */}
-                <Menu as="div" className="relative ml-3">
+                {/* <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="absolute -inset-1.5" />
@@ -132,7 +236,7 @@ const Navigation = () => {
                       </Menu.Item>
                     </Menu.Items>
                   </Transition>
-                </Menu>
+                </Menu> */}
               </div>
             </div>
           </div>

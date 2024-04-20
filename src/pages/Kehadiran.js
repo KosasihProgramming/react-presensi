@@ -170,7 +170,7 @@ class Kehadiran extends Component {
     ];
 
     const columnsPulang = [
-      "Nama Dokter",
+      "Nama Pegawai",
       "Barcode",
       "Shift",
       "Jam Masuk",

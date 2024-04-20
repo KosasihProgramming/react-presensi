@@ -168,3 +168,9 @@
   align-items: center;
   background-color: white;
 }
+
+.dropdown-container {
+  width: 180px;
+  border: 1px solid #0d9488;
+  border-radius: 8px;
+}
