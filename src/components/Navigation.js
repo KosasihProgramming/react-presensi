@@ -13,13 +13,13 @@ const navList = [
   { name: "Gaji Pershift", href: "/rekap-gaji", current: false },
   { name: "Gaji Perdokter", href: "/rekap-gaji-dokter", current: false },
   {
-    name: "Shift Perawat",
-    href: "/rekap-shift-perawat",
+    name: "Shift Perawat Gigi",
+    href: "/rekap-shift-perawat-gigi",
     current: false,
   },
   {
     name: "Rekap Gaji Perawat",
-    href: "/rekap-gaji-perawat",
+    href: "/rekap-periode-perawat-gigi",
     current: false,
   },
 ];

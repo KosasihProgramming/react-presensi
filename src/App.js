@@ -13,6 +13,7 @@ import RekapGajiDokter from "./pages/RekapGajiDokter";
 import ModalInfo from "./components/ModalInfo";
 import NavBootstrap from "./components/NavBootstrap";
 import RekapGajiShiftPerawat from "./pages/RekapGajiShiftPerawat";
+import RekapGajiPeriodePerawat from "./pages/RekapGajiPeriodePerawat";
 
 function App() {
   return (
@@ -34,8 +35,12 @@ function App() {
           <Route path="/rekap-gaji" Component={RekapGajiPerShift} />
           <Route path="/rekap-gaji-dokter" Component={RekapGajiDokter} />
           <Route
-            path="/rekap-shift-perawat"
+            path="/rekap-shift-perawat-gigi"
             Component={RekapGajiShiftPerawat}
+          />
+          <Route
+            path="/rekap-periode-perawat-gigi"
+            Component={RekapGajiPeriodePerawat}
           />
         </Routes>
       </Router>
