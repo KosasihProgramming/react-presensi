@@ -332,7 +332,7 @@ class RekapGajiDokter extends Component {
       tahun: tahunAwal,
     };
     axios
-      .post(urlAPI + "/insentif/hapus/data/", newData)
+      .post(urlAPI + "/insentif-perawat-gigi/hapus/data/", newData)
       .then((response) => {
         console.log(response.data, "Insentif");
       })
@@ -347,7 +347,7 @@ class RekapGajiDokter extends Component {
       tahun: tahunAwal,
     };
     axios
-      .post(urlAPI + "/total-gaji/delete/data", newData)
+      .post(urlAPI + "/periode-perawat-gaji/delete/data", newData)
       .then((response) => {
         console.log(response.data, "");
       })

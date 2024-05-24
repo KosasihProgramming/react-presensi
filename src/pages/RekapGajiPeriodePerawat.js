@@ -18,6 +18,26 @@ class RekapGajiPeriodePerawat extends Component {
     this.state = {
       selectedYear: new Date().getFullYear(),
       selectedMonth: "",
+      dataInsentif: 0,
+      dataNominal: [],
+      bulan: "",
+      judulKolom: [],
+      dataExport: [],
+      isCetak: false,
+      isDapat: false,
+      dataShift: [],
+      dataPeriode: [],
+      loading: false,
+      infoData: [],
+      dataBahan: [],
+      nameInfo: "",
+      showModal: false,
+      hasilPencarian: [],
+      isDokterGigi: false,
+      dataDokterGigi: [],
+      dataDokterPenggantiShift: [],
+      isFilterDokterPengganti: true,
+      dataGajiAkhirExport: [],
     };
   }
 
@@ -29,14 +49,565 @@ class RekapGajiPeriodePerawat extends Component {
     this.setState({ selectedMonth: select.value, bulan: select.label });
   };
 
+  getDatesBetween = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysBetween = differenceInDays(end, start) + 1;
+    const datesArray = eachDayOfInterval({ start: start, end: end });
+
+    const formattedDates = datesArray.map((date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Menambahkan angka 0 di depan untuk bulan dengan satu digit
+      const day = String(date.getDate()).padStart(2, "0"); // Menambahkan angka 0 di depan untuk hari dengan satu digit
+      return { tanggal: `${year}-${month}-${day}` };
+    });
+
+    return formattedDates;
+  };
+
+  cekData = () => {
+    console.log(this.state.dataShift, "shift");
+    const dataShift = this.state.dataShift;
+    const dataTotalGaji = this.state.dataPeriode;
+    if (dataShift.length > 0 && dataTotalGaji.length == 0) {
+      Swal.fire({
+        title: "Perhatian",
+        text: "Apakah Anda Ingin Memperbarui Data",
+        showDenyButton: true,
+        confirmButtonText: "Ya",
+        denyButtonText: "Tidak",
+        customClass: {
+          actions: "my-actions",
+          cancelButton: "order-1 right-gap",
+          confirmButton: "order-2",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.setState({ loading: true });
+          this.hapusShiftData();
+        } else if (result.isDenied) {
+        }
+      });
+    } else if (dataShift.length > 0 && dataTotalGaji.length > 0) {
+      Swal.fire({
+        title: "Perhatian",
+        text: "Apakah Anda Ingin Memperbarui Data",
+        showDenyButton: true,
+        confirmButtonText: "Ya",
+        denyButtonText: "Tidak",
+        customClass: {
+          actions: "my-actions",
+          cancelButton: "order-1 right-gap",
+          confirmButton: "order-2",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.setState({ loading: true });
+          this.hapusSemuaData();
+        } else if (result.isDenied) {
+        }
+      });
+    } else if (dataShift.length == 0 && dataTotalGaji.length > 0) {
+      Swal.fire({
+        title: "Perhatian",
+        text: "Apakah Anda Ingin Memperbarui Data",
+        showDenyButton: true,
+        confirmButtonText: "Ya",
+        denyButtonText: "Tidak",
+        customClass: {
+          actions: "my-actions",
+          cancelButton: "order-1 right-gap",
+          confirmButton: "order-2",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.setState({ loading: true });
+          this.hapusGajiData();
+        } else if (result.isDenied) {
+        }
+      });
+    } else {
+      // this.getDataInsentif();
+    }
+  };
+
+  cekDataInsentif = () => {
+    let tahunAwal = this.state.selectedYear;
+    const bulan = this.state.bulan;
+    let data = [];
+
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/insentif-perawat-gigi/cek/data/", newData)
+      .then((response) => {
+        this.setState({ dataShift: response.data });
+        this.cekDataTotalGaji();
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+    console.log(data, "shifthh");
+  };
+
+  cekDataTotalGaji = () => {
+    let tahunAwal = this.state.selectedYear;
+    const bulan = this.state.bulan;
+    let data = [];
+
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/periode-perawat-gigi/cek/data/", newData) //select data semua berdasarkan bulan, tahun
+      .then((response) => {
+        this.setState({ dataPeriode: response.data }, () => {
+          this.cekData();
+        });
+        // console.log("Sebelum Export: ", this.state.dataGajiAkhirExport);
+        const newDataBaru = this.state.dataGajiAkhirExport.reduce(
+          (acc, item) => {
+            acc.push(
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "NOMINAL SHIFT",
+                jumlah: item.total_data_nominal,
+                total: item.total_nominal,
+              },
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "INSENTIF PERAWAT GIGI",
+                jumlah: "",
+                total: item.total_insentif,
+              },
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "POTONGAN TELAT",
+                jumlah: "",
+                total: item.total_denda_telat,
+              },
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "TOTAL GAJI YANG DITERIMA",
+                jumlah: "",
+                total: item.total_data_gaji_akhir,
+              }
+            );
+            return acc;
+          },
+          []
+        );
+
+        // console.log(newDataBaru, "data baru");
+
+        const data = newDataBaru.map((item) => [
+          item.nama_dokter,
+          item.variabel,
+          item.jumlah === "" ? "" : item.jumlah,
+          item.total,
+        ]);
+
+        const newArray = [];
+        for (const obj of data) {
+          const rowValues = Object.values(obj);
+          newArray.push(rowValues);
+        }
+
+        const transformedArray = newArray.map((item) => {
+          const [nama_dokter, variabel, jumlah, total] = item;
+
+          // Jika nama dokter sama dengan elemen sebelumnya, ubah nama dokter menjadi string kosong
+          return [
+            nama_dokter === newArray[newArray.indexOf(item) - 1]?.[0]
+              ? ""
+              : nama_dokter,
+            variabel,
+            jumlah,
+            total,
+          ];
+        });
+
+        const propertyNames = ["Nama Perawat", "Variabel", "Jumlah", "Total"];
+
+        this.setState({
+          judulKolom: propertyNames,
+          dataExport: transformedArray,
+        });
+        this.setState({
+          isCetak: true,
+          loading: false,
+        });
+        console.log(response.data, "cek");
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+
+  handleExport = (e) => {
+    e.preventDefault();
+    const columnHeaders = this.state.judulKolom;
+
+    const csvString = [
+      columnHeaders.join(","),
+      ...this.state.dataExport.map((row) => {
+        const rowValues = Object.values(row).map((value) => `"${value}"`);
+        return rowValues.join(",");
+      }),
+    ].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "DATA-PENGGAJIAN-PERAWAT-GIGI.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    console.log(this.state.dataPeriode, "Ynag mau di export");
+  };
+
+  hapusShiftData = () => {
+    this.hapusDataInsentif();
+    this.getDataInsentif();
+  };
+  hapusGajiData = () => {
+    this.hapusDataTotalGaji();
+    this.getDataInsentif();
+  };
+  hapusSemuaData = () => {
+    this.hapusDataInsentif();
+    this.hapusDataTotalGaji();
+    this.getDataInsentif();
+  };
+  hapusDataInsentif = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/insentif-perawat-gigi/hapus/data/", newData)
+      .then((response) => {
+        console.log(response.data, "Insentif");
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+  hapusDataTotalGaji = () => {
+    let tahunAwal = this.state.selectedYear;
+    const newData = {
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    axios
+      .post(urlAPI + "/periode-perawat-gigi/delete/data", newData)
+      .then((response) => {
+        console.log(response.data, "");
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+  };
+  handleSearch = (e) => {
+    e.preventDefault();
+    this.setState({
+      isFilterDokterPengganti: true,
+    });
+    this.cekDataInsentif();
+  };
+
+  getDataInsentif = () => {
+    const bulan = this.state.selectedMonth;
+    let tahunAwal = this.state.selectedYear;
+    let bulanAwal = parseInt(bulan) - 1;
+    let tahunAkhir = this.state.selectedYear;
+
+    if (bulanAwal <= 9 && bulanAwal >= 1) {
+      bulanAwal = bulanAwal.toString().padStart(bulanAwal, "0");
+    } else if (bulanAwal <= 0) {
+      bulanAwal = "12";
+      tahunAwal = parseInt(tahunAkhir) - 1;
+    } else {
+      bulanAwal = bulanAwal.toString();
+    }
+    const tanggalAwal = `${tahunAwal}-${bulanAwal}-23`;
+    const tanggalAkhir = `${tahunAkhir}-${bulan}-22`;
+
+    const tanggalBanyak = this.getDatesBetween(tanggalAwal, tanggalAkhir);
+
+    let newDataNominal = [];
+
+    const postData = {
+      tanggalRange: tanggalBanyak,
+      bulan: this.state.bulan,
+      tahun: tahunAwal,
+    };
+    let isDapat = false;
+
+    axios
+      .post(urlAPI + "/insentif-perawat-gigi/nominal", postData)
+      .then((response) => {
+        if (response.data.length > 0) {
+          isDapat = true;
+          newDataNominal = newDataNominal.concat(response.data);
+          console.log(newDataNominal, "new Data nominal");
+
+          const dataBaru = this.hitungTotalNilai(newDataNominal);
+          console.log(dataBaru, "data baru");
+
+          const dataGajiAkhir = dataBaru.map((item) => {
+            // const pajak = (((item.total_gaji_periode * 50) / 100) * 5) / 100;
+            // const gajiAkhir = item.total_gaji_periode - pajak;
+            // item.pajak = pajak;
+            // item.gaji_akhir = gajiAkhir;
+
+            return item;
+          });
+          console.log(dataGajiAkhir, "ada pajak");
+          this.setState({ dataGajiAkhirExport: dataGajiAkhir });
+          // function insert
+          axios
+            .post(`${urlAPI}/periode-perawat-gigi/add/data`, dataGajiAkhir)
+            .then((response) => {
+              console.log(response.data, "insert data gaji");
+            })
+            .catch((error) => {
+              console.log("Error:", error);
+            });
+
+          const newDataBaru = dataBaru.reduce((acc, item) => {
+            acc.push(
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "NOMINAL SHIFT",
+                jumlah: item.total_data_nominal,
+                total: item.total_nominal,
+              },
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "INSENTIF PERAWAT GIGI",
+                jumlah: "",
+                total: item.total_insentif,
+              },
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "POTONGAN TELAT",
+                jumlah: "",
+                total: item.total_denda_telat,
+              },
+              {
+                nama_perawat: item.nama_perawat,
+                variabel: "TOTAL GAJI YANG DITERIMA",
+                jumlah: "",
+                total: item.total_data_gaji_akhir,
+              }
+            );
+            return acc;
+          }, []);
+
+          // console.log(newDataBaru, "data baru");
+
+          const data = newDataBaru.map((item) => [
+            item.nama_perawat,
+            item.variabel,
+            item.jumlah === "" ? "" : item.jumlah,
+            item.total,
+          ]);
+
+          const newArray = [];
+          for (const obj of data) {
+            const rowValues = Object.values(obj);
+            newArray.push(rowValues);
+          }
+
+          const transformedArray = newArray.map((item) => {
+            const [nama_dokter, variabel, jumlah, total] = item;
+
+            // Jika nama dokter sama dengan elemen sebelumnya, ubah nama dokter menjadi string kosong
+            return [
+              nama_dokter === newArray[newArray.indexOf(item) - 1]?.[0]
+                ? ""
+                : nama_dokter,
+              variabel,
+              jumlah,
+              total,
+            ];
+          });
+
+          console.log(transformedArray, "Tabel Export");
+
+          const propertyNames = ["Nama Perawat", "Variabel", "Jumlah", "Total"];
+
+          this.setState({
+            judulKolom: propertyNames,
+            dataExport: transformedArray,
+          });
+          this.setState({
+            dataNominal: newDataNominal,
+            dataBahan: newDataNominal,
+            isCetak: true,
+            loading: false,
+          });
+
+          this.setState({
+            loading: false,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Error pada tanggal", ":", error);
+      });
+    console.log(newDataNominal);
+  };
+
+  selectTotalGaji = () => {
+    const postData = {
+      bulan: this.state.bulan,
+      tahun: this.state.selectedYear,
+    };
+    axios
+      .post(`${urlAPI}/periode-perawat-gigi/cek/data`, postData)
+      .then((response) => {
+        console.log(response.data, "select data gaji");
+      })
+      .catch((error) => {
+        console.log("Error fatching data: ", error);
+      });
+  };
+
+  formatRupiah = (angka) => {
+    var rupiah = "";
+    var angkaRev = angka.toString().split("").reverse().join("");
+    for (var i = 0; i < angkaRev.length; i++)
+      if (i % 3 == 0) rupiah += angkaRev.substr(i, 3) + ".";
+    return (
+      "Rp " +
+      rupiah
+        .split("", rupiah.length - 1)
+        .reverse()
+        .join("")
+    );
+  };
+
+  hitungTotalNilai = (arr) => {
+    const result = {};
+    arr.forEach((item) => {
+      const key = item.barcode + item.nama_dokter;
+      // const keyGajiPeriode = item.barcode;
+      const existingItem = result[key];
+      // const existingGaji = result[keyGajiPeriode];
+
+      if (existingItem) {
+        existingItem.total_nominal += item.nominal_shift;
+        existingItem.total_data_nominal++;
+        existingItem.total_insentif += item.insentif;
+        existingItem.total_denda_telat += item.denda_telat;
+        existingItem.total_data_gaji_akhir += item.total_gaji;
+      } else {
+        result[key] = {
+          bulan: this.state.bulan,
+          tahun: this.state.selectedYear,
+          barcode: item.barcode,
+          nama_perawat: item.nama_perawat,
+          total_data_nominal: 1,
+          total_nominal: item.nominal_shift,
+          total_insentif: item.insentif,
+          total_denda_telat: item.denda_telat,
+          total_data_gaji_akhir: item.total_gaji,
+        };
+      }
+    });
+
+    // Ubah objek result menjadi array
+    const output = Object.values(result);
+    // this.hapusDataInsentif();
+    console.log(output, "output");
+    return output;
+  };
+
   render() {
+    const months = [
+      { value: "01", label: "Januari" },
+      { value: "02", label: "Februari" },
+      { value: "03", label: "Maret" },
+      { value: "04", label: "April" },
+      { value: "05", label: "Mei" },
+      { value: "06", label: "Juni" },
+      { value: "07", label: "Juli" },
+      { value: "08", label: "Agustus" },
+      { value: "09", label: "September" },
+      { value: "10", label: "Oktober" },
+      { value: "11", label: "November" },
+      { value: "12", label: "Desember" },
+    ];
+
+    const startYear = 1999; // Tahun mulai
+    const endYear = new Date().getFullYear(); // Tahun saat ini
+    const years = [];
+    for (let year = endYear; year >= startYear; year--) {
+      years.push(year);
+    }
+
+    const listPerawatGigi = this.state.dataPeriode.map((data) => {
+      return [
+        data.nama_perawat,
+        <button
+          // onClick={() => this.handleInfo(data, "Shift")}
+          className="cursor-pointer">
+          {data.total_data_nominal}
+        </button>,
+        this.formatRupiah(data.total_nominal),
+        <button
+          // onClick={() => this.handleInfo(data, "Insentif")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_insentif)}
+        </button>,
+        <button
+          // onClick={() => this.handleInfo(data, "Telat")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_denda_telat)}
+        </button>,
+        <button
+          // onClick={() => this.handleInfo(data, "Telat")}
+          className="cursor-pointer">
+          {this.formatRupiah(data.total_data_gaji_akhir)}
+        </button>,
+      ];
+    });
+
+    const columnsPerawatGigi = [
+      "Nama Perawat",
+      "Total Shift",
+      "Nominal Shift",
+      "Insentif",
+      "Denda Telat",
+      "Total Gaji",
+    ];
+
+    const options = {
+      selectableRows: false,
+      elevation: 0,
+      rowsPerPage: 15,
+      rowsPerPageOption: [5, 10],
+      filterDate: new Date().toLocaleDateString(),
+    };
+
     return (
       <>
+        {this.state.loading && (
+          <>
+            <LoadingAnimation />
+          </>
+        )}
         <div className="container mx-auto mb-16">
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
               <h4 className="text-black font-bold text-xl">
-                Cari Rekapan Per Periode
+                Cari Rekapan Perawat Gigi Per Periode
               </h4>
               <br />
               <hr />
@@ -52,20 +623,20 @@ class RekapGajiPeriodePerawat extends Component {
                       <select
                         className="bulan-field"
                         id="monthDropdown"
-                        // onChange={(e) =>
-                        //   this.handleMonthChange(
-                        //     months.find(
-                        //       (month) => month.value === e.target.value
-                        //     )
-                        //   )
-                        // }
+                        onChange={(e) =>
+                          this.handleMonthChange(
+                            months.find(
+                              (month) => month.value === e.target.value
+                            )
+                          )
+                        }
                         value={this.state.selectedMonth}>
                         <option value="">Pilih</option>
-                        {/* {months.map((month) => (
+                        {months.map((month) => (
                           <option key={month.value} value={month.value}>
                             {month.label}
                           </option>
-                        ))} */}
+                        ))}
                       </select>
                     </Form.Group>
 
@@ -77,14 +648,13 @@ class RekapGajiPeriodePerawat extends Component {
                       <select
                         className="bulan-field"
                         id="yearDropdown"
-                        // onChange={this.handleYearChange}
-                        // value={this.state.selectedYear}
-                      >
-                        {/* {years.map((year) => (
+                        onChange={this.handleYearChange}
+                        value={this.state.selectedYear}>
+                        {years.map((year) => (
                           <option key={year} value={year}>
                             {year}
                           </option>
-                        ))} */}
+                        ))}
                       </select>
                     </Form.Group>
                     <div
@@ -125,32 +695,7 @@ class RekapGajiPeriodePerawat extends Component {
                         <button
                           type="submit"
                           className="btn-input custom-btn btn-15"
-                          // onClick={this.handleFilterPengganti}
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "1rem",
-                          }}>
-                          <div className="icon">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="2rem"
-                              height="2rem"
-                              viewBox="0 0 24 24">
-                              <g fill="none" stroke="white" stroke-width="2">
-                                <circle cx="11" cy="11" r="7" />
-                                <path stroke-linecap="round" d="m20 20l-3-3" />
-                              </g>
-                            </svg>
-                          </div>
-                          Dr Pengganti
-                        </button>
-
-                        <button
-                          type="submit"
-                          className="btn-input custom-btn btn-15"
-                          // onClick={this.handleExport}
+                          onClick={this.handleExport}
                           style={{
                             display: "flex",
                             justifyContent: "center",
@@ -183,9 +728,9 @@ class RekapGajiPeriodePerawat extends Component {
             <div className="flex flex-col p-10">
               <MUIDataTable
                 title={"Data Rekap Dokter Gigi"}
-                // data={listDokterGigi}
-                // columns={columnsDokterGigi}
-                // options={options}
+                data={listPerawatGigi}
+                columns={columnsPerawatGigi}
+                options={options}
               />
             </div>
           </div>

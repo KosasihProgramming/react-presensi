@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import { urlAPI } from "../config/Global";
 import MUIDataTable from "mui-datatables";
 import Swal from "sweetalert2";
@@ -8,7 +8,7 @@ import LoadingAnimation from "../components/Loading";
 import { differenceInDays, eachDayOfInterval, formatDate } from "date-fns";
 import axios from "axios";
 
-class RekapGajiShiftPerawat extends Component {
+class RekapShiftPerawatUmum extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -19,6 +19,7 @@ class RekapGajiShiftPerawat extends Component {
       loading: false,
     };
   }
+
   handleYearChange = (e) => {
     this.setState({ selectedYear: parseInt(e.target.value) });
   };
@@ -46,11 +47,11 @@ class RekapGajiShiftPerawat extends Component {
   hapusDataInsentif = () => {
     let tahunAwal = this.state.selectedYear;
     const newData = {
-      bulan: this.state.bulan,
+      bulan: this.state.selectedMonth,
       tahun: tahunAwal,
     };
     axios
-      .post(urlAPI + "/insentif-perawat-gigi/hapus/data/", newData)
+      .post(urlAPI + "/insentif-perawat-umum/hapus/data/", newData)
       .then((response) => {
         console.log(response.data, "Insentif");
         this.getDataInsentif();
@@ -60,20 +61,14 @@ class RekapGajiShiftPerawat extends Component {
       });
   };
 
-  handleSearch = (e) => {
-    e.preventDefault();
-    this.cekDataInsentif();
-  };
-
   cekDataInsentif = () => {
     let tahunAwal = this.state.selectedYear;
     const newData = {
-      bulan: this.state.bulan,
+      bulan: this.state.selectedMonth,
       tahun: tahunAwal,
     };
-    console.log({ param: newData });
     axios
-      .post(`${urlAPI}/insentif-perawat-gigi/cek/data/`, newData)
+      .post(`${urlAPI}/insentif-perawat-umum/cek/data/`, newData)
       .then((response) => {
         if (response.data.length > 0) {
           Swal.fire({
@@ -102,15 +97,24 @@ class RekapGajiShiftPerawat extends Component {
       });
   };
 
+  handleSearch = (e) => {
+    e.preventDefault();
+    console.log(
+      { year: this.state.selectedYear },
+      { month: this.state.selectedMonth }
+    );
+    this.cekDataInsentif();
+  };
+
   getData = () => {
     let tahunAwal = this.state.selectedYear;
     const newData = {
-      bulan: this.state.bulan,
+      bulan: this.state.selectedMonth,
       tahun: tahunAwal,
     };
 
     axios
-      .post(urlAPI + "/insentif-perawat-gigi/cek/data/", newData)
+      .post(urlAPI + "/insentif-perawat-umum/cek/data/", newData)
       .then((response) => {
         console.log(response.data, "Insentif");
         const data = response.data.map((item) => [
@@ -179,13 +183,13 @@ class RekapGajiShiftPerawat extends Component {
 
     const postData = {
       tanggalRange: tanggalBanyak,
-      bulan: this.state.bulan,
+      bulan: this.state.selectedMonth,
       tahun: tahunAwal,
     };
     let isDapat = false;
 
     axios
-      .post(urlAPI + "/insentif-perawat-gigi/nominal", postData)
+      .post(urlAPI + "/insentif-perawat-umum/nominal", postData)
       .then((response) => {
         if (response.data.length > 0) {
           isDapat = true;
@@ -290,23 +294,6 @@ class RekapGajiShiftPerawat extends Component {
       years.push(year);
     }
 
-    const dataNominalList = this.state.dataNominal.map((data) => {
-      const denda = data.denda_telat;
-      let styleDenda =
-        denda === 0
-          ? "rounded-lg px-4 py-2 font-bold text-black"
-          : "rounded-lg bg-red-400 px-4 py-2 font-bold text-white";
-      return [
-        data.tanggal,
-        data.nama_perawat,
-        data.nama_shift,
-        this.formatRupiah(data.nominal_shift),
-        this.formatRupiah(data.insentif),
-        <div className={styleDenda}>{this.formatRupiah(data.denda_telat)}</div>,
-        this.formatRupiah(data.total_gaji),
-      ];
-    });
-
     const columnsData = [
       "Tanggal",
       "Nama Perawat",
@@ -327,16 +314,11 @@ class RekapGajiShiftPerawat extends Component {
 
     return (
       <>
-        {this.state.loading && (
-          <>
-            <LoadingAnimation />
-          </>
-        )}
         <div className="container mx-auto mb-16">
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
               <h4 className="text-black font-bold text-xl">
-                Cari Rekapan Perawat Gigi per shift
+                Cari Rekapan Perawat Umum per shift
               </h4>
               <br />
               <hr />
@@ -412,9 +394,9 @@ class RekapGajiShiftPerawat extends Component {
                               width="2rem"
                               height="2rem"
                               viewBox="0 0 24 24">
-                              <g fill="none" stroke="white" stroke-width="2">
+                              <g fill="none" stroke="white" strokeWidth="2">
                                 <circle cx="11" cy="11" r="7" />
-                                <path stroke-linecap="round" d="m20 20l-3-3" />
+                                <path strokeLinecap="round" d="m20 20l-3-3" />
                               </g>
                             </svg>
                           </div>
@@ -456,7 +438,7 @@ class RekapGajiShiftPerawat extends Component {
             <div className="flex flex-col p-10">
               <MUIDataTable
                 title={"Data Rekap"}
-                data={dataNominalList}
+                // data={dataNominalList}
                 columns={columnsData}
                 options={options}
               />
@@ -468,4 +450,4 @@ class RekapGajiShiftPerawat extends Component {
   }
 }
 
-export default RekapGajiShiftPerawat;
+export default RekapShiftPerawatUmum;

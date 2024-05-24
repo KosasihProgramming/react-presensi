@@ -33,6 +33,7 @@ class Absen extends Component {
       dataJadwalHariIni: [],
       namaPegawai: "",
       namaKlinik: "",
+      isProses: false,
     };
   }
 
@@ -179,6 +180,7 @@ class Absen extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
+    this.setState({ isProses: true });
     const {
       barcode,
       idJadwal,
@@ -480,7 +482,8 @@ class Absen extends Component {
                       <button
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                        onClick={this.handleSubmit}>
+                        onClick={this.handleSubmit}
+                        disabled={this.state.isProses}>
                         Hadir
                       </button>
                     </div>
