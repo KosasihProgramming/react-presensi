@@ -38,7 +38,7 @@ const formatCurrency = (number) => {
   }).format(number);
 };
 
-class RekapKehadiranDokterGigi extends Component {
+class RekapKehadiranPerawatGigi extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -54,7 +54,7 @@ class RekapKehadiranDokterGigi extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter-gigi/get`,
+        `${urlAPI}/rekap-kehadiran-perawat-gigi/get`,
         arg,
         {
           headers: {
@@ -72,7 +72,7 @@ class RekapKehadiranDokterGigi extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter-gigi/delete`,
+        `${urlAPI}/rekap-kehadiran-perawat-gigi/delete`,
         arg,
         {
           headers: {
@@ -91,7 +91,7 @@ class RekapKehadiranDokterGigi extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter-gigi/cek`,
+        `${urlAPI}/rekap-kehadiran-perawat-gigi/cek`,
         arg,
         {
           headers: {
@@ -110,7 +110,7 @@ class RekapKehadiranDokterGigi extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter-gigi/cek`,
+        `${urlAPI}/rekap-kehadiran-perawat-gigi/cek`,
         arg,
         {
           headers: {
@@ -148,9 +148,9 @@ class RekapKehadiranDokterGigi extends Component {
 
     const dates = [...new Set(sortedData.map((item) => item.tanggal))];
     const shifts = [
-      "Shift Dokter Gigi Pagi",
-      "Shift Dokter Gigi Siang",
-      "Shift Dokter Gigi Malam",
+      "Shift Perawat Gigi Pagi",
+      "Shift Perawat Gigi Siang",
+      "Shift Perawat Gigi Malam",
     ];
 
     const csvData = dates.map((date) => {
@@ -158,7 +158,7 @@ class RekapKehadiranDokterGigi extends Component {
       shifts.forEach((shift) => {
         const doctors = sortedData
           .filter((item) => item.tanggal === date && item.nama_shift === shift)
-          .map((item) => item.nama_dokter)
+          .map((item) => item.nama_perawat)
           .join(" & ");
         row[shift] = doctors || "";
       });
@@ -174,7 +174,7 @@ class RekapKehadiranDokterGigi extends Component {
     const formattedData = this.formatCSVData(rekapKehadiran);
     const csv = Papa.unparse(formattedData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "REKAP-KEHADIRAN-DOKTER-GIGI.csv");
+    saveAs(blob, "REKAP-KEHADIRAN-PERAWAT-GIGI.csv");
   };
 
   render() {
@@ -182,15 +182,14 @@ class RekapKehadiranDokterGigi extends Component {
 
     const dataTabel = rekapKehadiran.map((item) => [
       item.tanggal,
-      item.nama_dokter,
+      item.nama_perawat,
       item.nama_shift,
       item.telat ? (
         <div className="rounded bg-red-500 p-1 text-white">{`${item.telat} Menit`}</div>
       ) : (
         <div>{`${item.telat} Menit`}</div>
       ),
-      formatCurrency(item.garansi_fee),
-      formatCurrency(item.nominal),
+      formatCurrency(item.nominal_shift),
       item.denda_telat > 0 ? (
         <div className="rounded bg-red-500 p-1 text-white">
           {formatCurrency(item.denda_telat)}
@@ -202,10 +201,9 @@ class RekapKehadiranDokterGigi extends Component {
 
     const columnsData = [
       "Tanggal",
-      "Nama Dokter",
+      "Nama Perawat",
       "Nama Shift",
       "Telat",
-      "Garansi Fee",
       "Nominal",
       "Denda Telat",
     ];
@@ -224,7 +222,7 @@ class RekapKehadiranDokterGigi extends Component {
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
               <h4 className="text-black font-bold text-xl">
-                Cari Rekapan per periode - Dokter Gigi
+                Cari Rekapan per periode - Perawat Gigi
               </h4>
               <br />
               <hr />
@@ -344,7 +342,7 @@ class RekapKehadiranDokterGigi extends Component {
                 <h2>Memproses...</h2>
               ) : (
                 <MUIDataTable
-                  title={"Data Rekap Dokter Gigi"}
+                  title={"Data Rekap Perawat Gigi"}
                   data={dataTabel}
                   columns={columnsData}
                   options={options}
@@ -358,4 +356,4 @@ class RekapKehadiranDokterGigi extends Component {
   }
 }
 
-export default RekapKehadiranDokterGigi;
+export default RekapKehadiranPerawatGigi;

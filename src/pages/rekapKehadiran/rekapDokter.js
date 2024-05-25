@@ -42,6 +42,7 @@ class RekapKehadiranDokter extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isProses: false,
       bulan: null,
       tahun: new Date().getFullYear(),
       rekapKehadiran: [],
@@ -133,9 +134,11 @@ class RekapKehadiranDokter extends Component {
 
   handleSearch = (e) => {
     e.preventDefault();
+    this.setState({ isProses: true });
     const { bulan, tahun } = this.state;
     console.log(bulan, tahun);
     this.cekData(bulan, tahun);
+    this.setState({ isProses: false });
   };
 
   formatCSVData = (data) => {
@@ -337,12 +340,16 @@ class RekapKehadiranDokter extends Component {
 
           <div className="rounded-lg bg-white shadow-lg">
             <div className="flex flex-col p-10">
-              <MUIDataTable
-                title={"Data Rekap"}
-                data={dataTabel}
-                columns={columnsData}
-                options={options}
-              />
+              {this.state.isProses ? (
+                <h2>Memproses...</h2>
+              ) : (
+                <MUIDataTable
+                  title={"Data Rekap Dokter Umum"}
+                  data={dataTabel}
+                  columns={columnsData}
+                  options={options}
+                />
+              )}
             </div>
           </div>
         </div>
