@@ -24,6 +24,10 @@ const masterData = [
     name: "Rekap Kehadiran Perawat Gigi",
     href: "/rekap-kehadiran-perawat-gigi",
   },
+  { name: "Rekap Kehadiran Farmasi", href: "/rekap-kehadiran-farmasi" },
+  { name: "Rekap Kehadiran Apoteker", href: "/rekap-kehadiran-apoteker" },
+  { name: "Rekap Kehadiran Analis", href: "/rekap-kehadiran-analis" },
+  { name: "Rekap Kehadiran CS", href: "/rekap-kehadiran-cs" },
 ];
 
 function classNames(...classes) {

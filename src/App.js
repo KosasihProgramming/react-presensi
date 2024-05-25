@@ -16,6 +16,7 @@ import RekapShiftPerawatUmum from "./pages/RekapShiftPerawatUmum";
 import Login from "./pages/Login";
 import RekapKehadiranDokter from "./pages/rekapKehadiran/RekapDokter";
 import RekapKehadiranDokterGigi from "./pages/rekapKehadiran/RekapDokterGigi";
+import RekapKehadiranPerawat from "./pages/rekapKehadiran/RekapPerawat";
 
 function App() {
   const isLoggedIn = sessionStorage.getItem("user");
@@ -43,6 +44,10 @@ function App() {
               <Route
                 path="/rekap-kehadiran-dokter-gigi"
                 Component={RekapKehadiranDokterGigi}
+              />
+              <Route
+                path="/rekap-kehadiran-perawat"
+                Component={RekapKehadiranPerawat}
               />
 
               {/* Penggajian */}
