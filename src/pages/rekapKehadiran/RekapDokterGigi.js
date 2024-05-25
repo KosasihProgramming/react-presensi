@@ -38,7 +38,7 @@ const formatCurrency = (number) => {
   }).format(number);
 };
 
-class RekapKehadiranDokter extends Component {
+class RekapKehadiranDokterGigi extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -53,7 +53,7 @@ class RekapKehadiranDokter extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter/get`,
+        `${urlAPI}/rekap-kehadiran-dokter-gigi/get`,
         arg,
         {
           headers: {
@@ -71,7 +71,7 @@ class RekapKehadiranDokter extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter/delete`,
+        `${urlAPI}/rekap-kehadiran-dokter-gigi/delete`,
         arg,
         {
           headers: {
@@ -90,7 +90,7 @@ class RekapKehadiranDokter extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter/cek`,
+        `${urlAPI}/rekap-kehadiran-dokter-gigi/cek`,
         arg,
         {
           headers: {
@@ -109,7 +109,7 @@ class RekapKehadiranDokter extends Component {
 
     try {
       const response = await axios.post(
-        `${urlAPI}/rekap-kehadiran-dokter/cek`,
+        `${urlAPI}/rekap-kehadiran-dokter-gigi/cek`,
         arg,
         {
           headers: {
@@ -145,9 +145,9 @@ class RekapKehadiranDokter extends Component {
 
     const dates = [...new Set(sortedData.map((item) => item.tanggal))];
     const shifts = [
-      "Shift Dokter Pagi",
-      "Shift Dokter Siang",
-      "Shift Dokter Malam",
+      "Shift Dokter Gigi Pagi",
+      "Shift Dokter Gigi Siang",
+      "Shift Dokter Gigi Malam",
     ];
 
     const csvData = dates.map((date) => {
@@ -171,7 +171,7 @@ class RekapKehadiranDokter extends Component {
     const formattedData = this.formatCSVData(rekapKehadiran);
     const csv = Papa.unparse(formattedData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "REKAP-KEHADIRAN-DOKTER-UMUM.csv");
+    saveAs(blob, "REKAP-KEHADIRAN-DOKTER-GIGI.csv");
   };
 
   render() {
@@ -221,7 +221,7 @@ class RekapKehadiranDokter extends Component {
           <div className="rounded-lg bg-white shadow-lg my-5">
             <div className="flex flex-col p-10">
               <h4 className="text-black font-bold text-xl">
-                Cari Rekapan per periode
+                Cari Rekapan per periode - Dokter Gigi
               </h4>
               <br />
               <hr />
@@ -338,7 +338,7 @@ class RekapKehadiranDokter extends Component {
           <div className="rounded-lg bg-white shadow-lg">
             <div className="flex flex-col p-10">
               <MUIDataTable
-                title={"Data Rekap"}
+                title={"Data Rekap Dokter Gigi"}
                 data={dataTabel}
                 columns={columnsData}
                 options={options}
@@ -351,4 +351,4 @@ class RekapKehadiranDokter extends Component {
   }
 }
 
-export default RekapKehadiranDokter;
+export default RekapKehadiranDokterGigi;
