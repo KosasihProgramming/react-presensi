@@ -14,7 +14,7 @@ import RekapGajiShiftPerawat from "./pages/RekapGajiShiftPerawat";
 import RekapGajiPeriodePerawat from "./pages/RekapGajiPeriodePerawat";
 import RekapShiftPerawatUmum from "./pages/RekapShiftPerawatUmum";
 import Login from "./pages/Login";
-import RekapKehadiranDokter from "./pages/rekapKehadiran/rekapDokter";
+import RekapKehadiranDokter from "./pages/rekapKehadiran/RekapDokter";
 
 function App() {
   const isLoggedIn = sessionStorage.getItem("user");
