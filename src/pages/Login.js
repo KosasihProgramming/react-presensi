@@ -15,10 +15,13 @@ class Login extends Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/login/check", {
-        usere: this.state.username,
-        passworde: this.state.password,
-      });
+      const response = await axios.post(
+        "https://komangchandra.my.id/presensi-test/login/check",
+        {
+          usere: this.state.username,
+          passworde: this.state.password,
+        }
+      );
       console.log(response.data);
       if (response.data.status === "success") {
         sessionStorage.setItem(
