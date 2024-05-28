@@ -1,7 +1,7 @@
 import axios from "axios";
 import MUIDataTable from "mui-datatables";
 import { Component } from "react";
-import { urlAPI } from "../config/Global";
+import { urlAPI } from "../config/global";
 import { Link } from "react-router-dom";
 import { HiOutlineSelector } from "react-icons/hi";
 import { TextField } from "@mui/material";

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MUIDataTable from "mui-datatables";
 import axios from "axios";
-import { urlAPI } from "../config/Global";
+import { urlAPI } from "../config/global";
 import Swal from "sweetalert2";
 
 class Home extends Component {

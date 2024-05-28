@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { Component } from "react";
 import Webcam from "react-webcam";
 import Swal from "sweetalert2";
-import { urlAPI, botTokenTelegram, chatIdTelegram } from "../config/Global";
+import { urlAPI, botTokenTelegram, chatIdTelegram } from "../config/global";
 import { konfersiJam } from "../function/konfersiJam";
 import { FiSearch } from "react-icons/fi";
 import { ToastContainer, Bounce, toast } from "react-toastify";

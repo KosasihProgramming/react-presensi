@@ -5,7 +5,7 @@ import Papa from "papaparse";
 import MUIDataTable from "mui-datatables";
 import { Form } from "react-bootstrap";
 import "../../style/jadwal.css";
-import { urlAPI } from "../../config/Global";
+import { urlAPI } from "../../config/global";
 
 const months = [
   { value: "Januari", label: "Januari" },

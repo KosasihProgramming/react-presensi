@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { Component } from "react";
 import Webcam from "react-webcam";
-import { urlAPI } from "../config/Global";
+import { urlAPI } from "../config/global";
 import withRouter from "../withRouter";
 import { Link } from "react-router-dom";
 import { konfersiJam } from "../function/konfersiJam";

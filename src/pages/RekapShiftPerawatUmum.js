@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { urlAPI } from "../config/Global";
+import { urlAPI } from "../config/global";
 import MUIDataTable from "mui-datatables";
 import Swal from "sweetalert2";
 import { Row, Col, Form, Card, Button } from "react-bootstrap";

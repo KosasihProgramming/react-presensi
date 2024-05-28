@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Component } from "react";
-import { urlAPI } from "../config/Global";
+import { urlAPI } from "../config/global";
 import { differenceInDays, eachDayOfInterval, formatDate } from "date-fns";
 import MUIDataTable from "mui-datatables";
 import Swal from "sweetalert2";
