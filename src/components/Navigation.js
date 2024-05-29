@@ -28,6 +28,10 @@ const masterData = [
   { name: "Rekap Kehadiran Apoteker", href: "/rekap-kehadiran-apoteker" },
   { name: "Rekap Kehadiran Analis", href: "/rekap-kehadiran-analis" },
   { name: "Rekap Kehadiran CS", href: "/rekap-kehadiran-cs" },
+  {
+    name: "Rekap Kehadiran Pegawai Kantor",
+    href: "/rekap-kehadiran-pegawai-kantor",
+  },
 ];
 
 function classNames(...classes) {
