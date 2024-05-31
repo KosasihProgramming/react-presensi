@@ -40,10 +40,10 @@ function App() {
               <Route path="/kehadiran" Component={Kehadiran} />
               <Route path="/presensi" Component={Absen} />
               <Route path="/pulang/:id_kehadiran" Component={Pulang} />
-              {/* <Route
+              <Route
                 path="/rekap-kehadiran-dokter"
                 Component={RekapKehadiranDokter}
-              /> */}
+              />
               <Route
                 path="/rekap-kehadiran-dokter-gigi"
                 Component={RekapKehadiranDokterGigi}
