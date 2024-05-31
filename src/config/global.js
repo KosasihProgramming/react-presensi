@@ -1,8 +1,8 @@
 // const protocol = window.location.protocol;
 // const host = "202.157.189.177:5000";
-// export const urlAPI = `${protocol}//${host}`;
+export const urlAPI = `http://202.157.189.177:5000`;
 
-export const urlAPI = `http://localhost:5000`;
+// export const urlAPI = `http://localhost:5000`;
 
 // export const urlAPI = "http://26.29.249.145:2500";
 export const botTokenTelegram =
