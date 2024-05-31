@@ -25,7 +25,9 @@ class Home extends Component {
 
   getAllDataShift = () => {
     axios
-      .get(urlAPI + "/shift")
+      .get(urlAPI + "/shift", {
+        referrerPolicy: "unsafe-url",
+      })
       .then((response) => {
         this.setState({ dataShift: response.data });
         console.log(response.data);
