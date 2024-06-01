@@ -14,13 +14,12 @@ import RekapGajiShiftPerawat from "./pages/RekapGajiShiftPerawat";
 import RekapGajiPeriodePerawat from "./pages/RekapGajiPeriodePerawat";
 import RekapShiftPerawatUmum from "./pages/RekapShiftPerawatUmum";
 import Login from "./pages/Login";
-// import RekapKehadiranDokter from "./pages/rekapKehadiran/RekapDokter";
+import RekapKehadiranDokter from "./pages/rekapKehadiran/RekapDokter";
 import RekapKehadiranDokterGigi from "./pages/rekapKehadiran/RekapDokterGigi";
 import RekapKehadiranPerawat from "./pages/rekapKehadiran/RekapPerawat";
 import RekapKehadiranPerawatGigi from "./pages/rekapKehadiran/RekapPerawatGigi";
 import RekapKehadiranFarmasi from "./pages/rekapKehadiran/RekapFarmasi";
 import RekapKehadiranPegawai from "./pages/rekapKehadiran/RekapPegawaiKantor";
-// import RekapKehadiranDokter from "./pages/rekapKehadiran/RekapDokter";
 
 function App() {
   const isLoggedIn = sessionStorage.getItem("user");
@@ -41,10 +40,10 @@ function App() {
               <Route path="/kehadiran" Component={Kehadiran} />
               <Route path="/presensi" Component={Absen} />
               <Route path="/pulang/:id_kehadiran" Component={Pulang} />
-              {/* <Route
+              <Route
                 path="/rekap-kehadiran-dokter"
                 Component={RekapKehadiranDokter}
-              /> */}
+              />
               <Route
                 path="/rekap-kehadiran-dokter-gigi"
                 Component={RekapKehadiranDokterGigi}

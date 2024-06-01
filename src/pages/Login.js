@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { urlAPI } from "../config/global";
 
 class Login extends Component {
   constructor(props) {
@@ -15,13 +16,10 @@ class Login extends Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "https://komangchandra.my.id/presensi-test/login/check",
-        {
-          usere: this.state.username,
-          passworde: this.state.password,
-        }
-      );
+      const response = await axios.post(`${urlAPI}/login/check`, {
+        usere: this.state.username,
+        passworde: this.state.password,
+      });
       console.log(response.data);
       if (response.data.status === "success") {
         sessionStorage.setItem(
