@@ -1,6 +1,6 @@
 // const protocol = window.location.protocol;
 // const host = "202.157.189.177:5000";
-// export const urlAPI = `http://202.157.189.177:5000`;
+// export const urlAPI = `https://202.157.189.177:8443`;
 
 // export const urlAPI = `http://localhost:5000`;
 
