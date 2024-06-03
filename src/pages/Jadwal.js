@@ -243,7 +243,7 @@ class JadwalKehadiran extends Component {
       return;
     } else {
       axios
-        .post("https://komangchandra.my.id/presensi-test/jadwal/add/", postData)
+        .post(urlAPI + "/jadwal/add/", postData)
         .then((response) => {
           Swal.fire({
             icon: "success",
@@ -260,7 +260,7 @@ class JadwalKehadiran extends Component {
 
   getPegawai = () => {
     axios
-      .get("https://komangchandra.my.id/presensi-test/pegawai/data/")
+      .get(urlAPI + "/pegawai/data/")
       .then((response) => {
         console.log(response);
 
@@ -277,7 +277,7 @@ class JadwalKehadiran extends Component {
 
   getBarcode = () => {
     axios
-      .get("https://komangchandra.my.id/presensi-test/barcode/")
+      .get(urlAPI + "/barcode/")
       .then((response) => {
         console.log(response);
 
@@ -307,7 +307,7 @@ class JadwalKehadiran extends Component {
     console.log(this.state.dataJadwal);
 
     axios
-      .post("https://komangchandra.my.id/presensi-test/jadwal/data/", postData)
+      .post(urlAPI + "/jadwal/data/", postData)
       .then((response) => {
         // Adding tanggal property to each data item
         const newData = response.data.map((item) => ({
@@ -339,9 +339,7 @@ class JadwalKehadiran extends Component {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(
-            `https://komangchandra.my.id/presensi-test/jadwal/delete/${idJadwal}`
-          )
+          .delete(`${urlAPI}/jadwal/delete/${idJadwal}`)
           .then((response) => {
             Swal.fire({
               icon: "success",
@@ -424,7 +422,7 @@ class JadwalKehadiran extends Component {
     };
 
     axios
-      .post("https://komangchandra.my.id/presensi-test/jadwal/edit/", postData)
+      .post(urlAPI + "/jadwal/edit/", postData)
       .then((response) => {
         Swal.fire({
           icon: "success",
