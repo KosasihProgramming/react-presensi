@@ -72,6 +72,7 @@ class DetailJadwal extends Component {
     this.formatTanggal();
     this.getJadwal();
     this.getShift();
+    this.getDetailJadwal();
   };
 
   getDatesBetween = (startDate, endDate) => {
@@ -278,7 +279,7 @@ class DetailJadwal extends Component {
     const postData = {
       idJadwal,
     };
-
+    // alert("jalan");
     axios
       .post(urlAPI + "/detail-jadwal/", postData)
       .then((response) => {
@@ -715,15 +716,15 @@ class DetailJadwal extends Component {
                 </div>{" "}
                 <div className="detail-card-foot-content">
                   <h6>Jumlah Jam Kerja</h6>
-                  <p>9</p>
+                  <p>-</p>
                 </div>
                 <div className="detail-card-foot-content">
                   <h6>Jumlah Telat</h6>
-                  <p>9</p>
+                  <p>-</p>
                 </div>{" "}
                 <div className="detail-card-foot-content">
                   <h6>Nominal Telat</h6>
-                  <p>9</p>
+                  <p>-</p>
                 </div>
               </div>
               <div className="btn-group">
