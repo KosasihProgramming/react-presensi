@@ -29,6 +29,8 @@ class DetailJadwal extends Component {
     const { idJadwal } = this.props.params;
     this.state = {
       tanggalDate: dayjs("2024-02-23T10:50"),
+      tanggalDateAwal: dayjs("2024-02-23T10:50"),
+      tanggalDateAkhir: dayjs("2024-02-23T10:50"),
       tanggal: "",
       barcode: "",
       bulan: "",
@@ -41,6 +43,7 @@ class DetailJadwal extends Component {
       shiftTerpilih: {},
       judul: [],
       dataJadwal: [],
+      isInputJadwalOtomatis: false,
       isUpdate: false,
       isInput: false,
       idJadwal: "",
@@ -54,6 +57,8 @@ class DetailJadwal extends Component {
       persenHadir: 0,
       tanggalAwal: "",
       tanggalAkhir: "",
+      tanggalAwalOtomatis: "",
+      tanggalAkhirOtomatis: "",
       tableDetail: true,
       kalenderDetail: false,
       height: "0px",
@@ -90,6 +95,7 @@ class DetailJadwal extends Component {
 
     this.setState({ kalender: formattedDates });
     console.log(formattedDates);
+    return formattedDates;
   };
   handleTab = () => {
     this.setState({ tableDetail: true, kalenderDetail: false });
@@ -182,11 +188,22 @@ class DetailJadwal extends Component {
     }
     const formattedDate = dayjsDate.format("YYYY/MM/DD");
 
-    this.setState({
-      tanggal: formattedDate,
-      tanggalDate: selectedDate,
-    });
-
+    if (name == "tanggalDateAwal") {
+      this.setState({
+        tanggalAwalOtomatis: formattedDate,
+        tanggalDateAwal: selectedDate,
+      });
+    } else if (name == "tanggalDateAkhir") {
+      this.setState({
+        tanggalAkhirOtomatis: formattedDate,
+        tanggalDateAkhir: selectedDate,
+      });
+    } else {
+      this.setState({
+        tanggal: formattedDate,
+        tanggalDate: selectedDate,
+      });
+    }
     // Update the state with the formatted date
   };
   handleInputChange = (e) => {
@@ -248,6 +265,71 @@ class DetailJadwal extends Component {
           console.log("Error:", error);
         });
     }
+  };
+
+  handleSubmitOtomatis = (e) => {
+    e.preventDefault();
+    const { idShift, idJadwal, tanggalAwalOtomatis, tanggalAkhirOtomatis } =
+      this.state;
+
+    console.log(idJadwal);
+    console.log(idShift);
+    console.log(tanggalAwalOtomatis);
+    console.log(tanggalAkhirOtomatis);
+
+    const rentangTanggal = this.getDatesBetween(
+      tanggalAwalOtomatis,
+      tanggalAkhirOtomatis
+    );
+
+    console.log(rentangTanggal);
+
+    // Cek kelengkapan form
+    if (!idShift || !idJadwal || rentangTanggal.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan",
+        text: "Data harus diisi lengkap",
+      });
+      return;
+    }
+
+    const dataDetail = this.state.dataDetail;
+
+    rentangTanggal.forEach((tanggal) => {
+      const postData = {
+        idShift,
+        idJadwal,
+        tanggal,
+      };
+
+      const dataExists = dataDetail.some((jadwal) => {
+        // Membandingkan idShift dan tanggal dengan data yang ada
+        return jadwal.id_shift === idShift && jadwal.tanggal === tanggal;
+      });
+
+      if (dataExists) {
+        Swal.fire({
+          icon: "error",
+          title: "Kesalahan",
+          text: `Jadwal untuk tanggal ${tanggal} sudah ada, silakan buat jadwal lain`,
+        });
+      } else {
+        axios
+          .post(urlAPI + "/detail-jadwal/add/", postData)
+          .then((response) => {
+            Swal.fire({
+              icon: "success",
+              title: "Berhasil",
+              text: `Data untuk tanggal ${tanggal} berhasil disimpan`,
+            });
+            this.getDetailJadwal(this.state.idJadwal);
+          })
+          .catch((error) => {
+            console.log("Error:", error);
+          });
+      }
+    });
   };
 
   getShift = () => {
@@ -524,6 +606,16 @@ class DetailJadwal extends Component {
     console.log(`${name} Terpilih`, this.state[name]);
   };
   handleInput = () => {
+    this.setState({ isInputJadwalOtomatis: false });
+    if (this.state.isInput == true) {
+      this.setState({ isInput: false });
+    } else {
+      this.setState({ isInput: true });
+    }
+  };
+
+  handleInputOtomatis = () => {
+    this.setState({ isInputJadwalOtomatis: true });
     if (this.state.isInput == true) {
       this.setState({ isInput: false });
     } else {
@@ -631,14 +723,17 @@ class DetailJadwal extends Component {
   render() {
     // const tanggalNew = new Date(data.tanggal);
     // const tanggalTarget = tanggalNew.toLocaleDateString().split("T")[0];
-    const dataDetail = this.state.dataDetail.map((data) => [
-      data.tanggal,
-      data.nama_shift,
-      data.jam_masuk,
-      data.jam_pulang,
-      data.hadir,
-      data.nominal_hadir,
-    ]);
+    const dataDetail = this.state.dataDetail
+      .slice()
+      .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
+      .map((data) => [
+        data.tanggal,
+        data.nama_shift,
+        data.jam_masuk,
+        data.jam_pulang,
+        data.hadir,
+        data.nominal_hadir,
+      ]);
 
     const columns = [
       "Tanggal",
@@ -705,7 +800,7 @@ class DetailJadwal extends Component {
                   </h6>
                 </div>
               </div>
-              <div className="detail-card-main-foot" style={{ zIndex: "999" }}>
+              <div className="detail-card-main-foot" style={{ zIndex: "995" }}>
                 <div className="detail-card-foot-content">
                   <h6>Jumlah Jadwal</h6>
                   <p>{this.state.totalJadwal}</p>
@@ -734,131 +829,279 @@ class DetailJadwal extends Component {
                   onClick={this.handleInput}>
                   Tambah Detail Jadwal
                 </button>
+                <button
+                  type="submit"
+                  className="btn-input custom-btn btn-15"
+                  style={{ width: "19rem" }}
+                  onClick={this.handleInputOtomatis}>
+                  Tambah Detail Jadwal Otomatis
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg bg-white shadow-lg my-5">
-          <Box
-            sx={{
-              width: "100%",
-              borderRadius: 2,
-              border: "1px solid",
-              borderColor: "divider",
-              backgroundColor: "background.default",
-              height: this.state.isInput ? "auto" : this.state.height,
-            }}
-            className="rounded-lg bg-white shadow-lg my-5">
+        {this.state.isInputJadwalOtomatis ? (
+          <div className="rounded-lg bg-white shadow-lg my-5">
             <Box
-              sx={{ p: 2, height: "auto", overflowY: "scroll" }}
-              ref={this.containerRef}>
-              <Slide
-                in={this.state.isInput}
-                container={this.containerRef.current}>
-                {
-                  <div
-                    className="flex flex-col p-10"
-                    style={{ backgroundColor: "white" }}>
-                    <h6 className="title-2">Input Detail Jadwal</h6>
-                    <div className="form-input">
-                      <Row
-                        className="form-row"
-                        style={{
-                          justifyContent: "flex-start",
-                          gap: "2rem",
-                        }}>
-                        <Form.Group className="form-field">
-                          <Form.Label className="label-text">
-                            Shift :
-                          </Form.Label>
-                          <div className="dropdown-container">
-                            <Select
-                              onChange={(selectedOption) =>
-                                this.handleSelect(
-                                  "barcodeTerpilih",
-                                  selectedOption
-                                )
-                              }
-                              name="barcodeTerpilih"
-                              inputId="input"
-                              placeholder="Pilih Pegawai..."
-                              options={shiftOptions}
-                              isSearchable={true}
-                            />
-                          </div>
-                        </Form.Group>
-                        <Form.Group className="form-field">
-                          <Form.Label className="label-text">
-                            Jam Masuk :
-                          </Form.Label>
-
-                          <div
-                            type="text"
-                            style={{ width: "10rem" }}
-                            placeholder="Nama"
-                            className="nama-field"
-                            value={this.state.jamMasuk}>
-                            {this.state.jamMasuk}
-                          </div>
-                        </Form.Group>
-                        '
-                        <Form.Group className="form-field">
-                          <Form.Label className="label-text">
-                            Jam Keluar :
-                          </Form.Label>
-
-                          <div
-                            type="text"
-                            placeholder="Nama"
-                            style={{ width: "10rem" }}
-                            className="nama-field"
-                            value={this.state.jamKeluar}>
-                            {this.state.jamKeluar}
-                          </div>
-                        </Form.Group>
-                        '
-                        <Form.Group className="form-field">
-                          <Form.Label className="label-text">
-                            Tanggal :
-                          </Form.Label>
-                          <div className="datepicker">
-                            <LocalizationProvider
-                              dateAdapter={AdapterDayjs}
-                              className="datepicker"
-                              adapterLocale="en-gb">
-                              <DatePicker
-                                name="tanggalAwal"
-                                locale="id"
-                                style={{ zIndex: "999999" }}
-                                label="Tanggal Awal"
-                                value={this.state.tanggalDate}
-                                onChange={(selectedDate) =>
-                                  this.handleDateChange(
-                                    "tanggalDate",
-                                    selectedDate
+              sx={{
+                width: "100%",
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: "background.default",
+                height: this.state.isInput ? "auto" : this.state.height,
+              }}
+              className="rounded-lg bg-white shadow-lg my-5">
+              <Box
+                sx={{ p: 2, height: "auto", overflowY: "scroll" }}
+                ref={this.containerRef}>
+                <Slide
+                  in={this.state.isInput}
+                  container={this.containerRef.current}>
+                  {
+                    <div
+                      className="flex flex-col p-10"
+                      style={{ backgroundColor: "white" }}>
+                      <h6 className="title-2">Input Detail Jadwal Otomatis</h6>
+                      <div className="form-input">
+                        <Row
+                          className="form-row"
+                          style={{
+                            justifyContent: "flex-start",
+                            gap: "2rem",
+                          }}>
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Shift :
+                            </Form.Label>
+                            <div className="dropdown-container">
+                              <Select
+                                onChange={(selectedOption) =>
+                                  this.handleSelect(
+                                    "barcodeTerpilih",
+                                    selectedOption
                                   )
                                 }
-                                inputFormat="DD/MM/YYYY"
+                                name="barcodeTerpilih"
+                                inputId="input"
+                                placeholder="Pilih Pegawai..."
+                                options={shiftOptions}
+                                isSearchable={true}
                               />
-                            </LocalizationProvider>
-                          </div>
-                        </Form.Group>
-                      </Row>
-                      <button
-                        type="submit"
-                        style={{ marginTop: "2rem" }}
-                        className="btn-input btn-15 custom-btn"
-                        onClick={this.handleSubmit}>
-                        Simpan
-                      </button>
+                            </div>
+                          </Form.Group>
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Jam Masuk :
+                            </Form.Label>
+
+                            <div
+                              type="text"
+                              style={{ width: "8rem" }}
+                              placeholder="Nama"
+                              className="nama-field"
+                              value={this.state.jamMasuk}>
+                              {this.state.jamMasuk}
+                            </div>
+                          </Form.Group>
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Jam Keluar :
+                            </Form.Label>
+
+                            <div
+                              type="text"
+                              placeholder="Nama"
+                              style={{ width: "8rem" }}
+                              className="nama-field"
+                              value={this.state.jamKeluar}>
+                              {this.state.jamKeluar}
+                            </div>
+                          </Form.Group>
+                          <Form.Group className="form-field">
+                            <div className="datepicker">
+                              <LocalizationProvider
+                                dateAdapter={AdapterDayjs}
+                                className="datepicker"
+                                adapterLocale="en-gb">
+                                <DatePicker
+                                  name="tanggalAwal"
+                                  locale="id"
+                                  style={{ zIndex: "999999" }}
+                                  label="Tanggal Awal"
+                                  value={this.state.tanggalDateAwal}
+                                  onChange={(selectedDate) =>
+                                    this.handleDateChange(
+                                      "tanggalDateAwal",
+                                      selectedDate
+                                    )
+                                  }
+                                  inputFormat="DD/MM/YYYY"
+                                />
+                              </LocalizationProvider>
+                            </div>
+                          </Form.Group>
+                          <Form.Group className="form-field">
+                            <div className="datepicker">
+                              <LocalizationProvider
+                                dateAdapter={AdapterDayjs}
+                                className="datepicker"
+                                adapterLocale="en-gb">
+                                <DatePicker
+                                  name="tanggalAwal"
+                                  locale="id"
+                                  style={{ zIndex: "999999" }}
+                                  label="Tanggal Akhir"
+                                  value={this.state.tanggalDateAkhir}
+                                  onChange={(selectedDate) =>
+                                    this.handleDateChange(
+                                      "tanggalDateAkhir",
+                                      selectedDate
+                                    )
+                                  }
+                                  inputFormat="DD/MM/YYYY"
+                                />
+                              </LocalizationProvider>
+                            </div>
+                          </Form.Group>
+                        </Row>
+                        <button
+                          type="submit"
+                          style={{ marginTop: "2rem" }}
+                          className="btn-input btn-15 custom-btn"
+                          onClick={this.handleSubmitOtomatis}>
+                          Simpan
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                }
-              </Slide>
+                  }
+                </Slide>
+              </Box>
             </Box>
-          </Box>
-        </div>
+          </div>
+        ) : (
+          <div className="rounded-lg bg-white shadow-lg my-5">
+            <Box
+              sx={{
+                width: "100%",
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: "background.default",
+                height: this.state.isInput ? "auto" : this.state.height,
+              }}
+              className="rounded-lg bg-white shadow-lg my-5">
+              <Box
+                sx={{ p: 2, height: "auto", overflowY: "scroll" }}
+                ref={this.containerRef}>
+                <Slide
+                  in={this.state.isInput}
+                  container={this.containerRef.current}>
+                  {
+                    <div
+                      className="flex flex-col p-10"
+                      style={{ backgroundColor: "white" }}>
+                      <h6 className="title-2">Input Detail Jadwal</h6>
+                      <div className="form-input">
+                        <Row
+                          className="form-row"
+                          style={{
+                            justifyContent: "flex-start",
+                            gap: "2rem",
+                          }}>
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Shift :
+                            </Form.Label>
+                            <div className="dropdown-container">
+                              <Select
+                                onChange={(selectedOption) =>
+                                  this.handleSelect(
+                                    "barcodeTerpilih",
+                                    selectedOption
+                                  )
+                                }
+                                name="barcodeTerpilih"
+                                inputId="input"
+                                placeholder="Pilih Pegawai..."
+                                options={shiftOptions}
+                                isSearchable={true}
+                              />
+                            </div>
+                          </Form.Group>
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Jam Masuk :
+                            </Form.Label>
+
+                            <div
+                              type="text"
+                              style={{ width: "10rem" }}
+                              placeholder="Nama"
+                              className="nama-field"
+                              value={this.state.jamMasuk}>
+                              {this.state.jamMasuk}
+                            </div>
+                          </Form.Group>
+                          '
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Jam Keluar :
+                            </Form.Label>
+
+                            <div
+                              type="text"
+                              placeholder="Nama"
+                              style={{ width: "10rem" }}
+                              className="nama-field"
+                              value={this.state.jamKeluar}>
+                              {this.state.jamKeluar}
+                            </div>
+                          </Form.Group>
+                          '
+                          <Form.Group className="form-field">
+                            <Form.Label className="label-text">
+                              Tanggal :
+                            </Form.Label>
+                            <div className="datepicker">
+                              <LocalizationProvider
+                                dateAdapter={AdapterDayjs}
+                                className="datepicker"
+                                adapterLocale="en-gb">
+                                <DatePicker
+                                  name="tanggalAwal"
+                                  locale="id"
+                                  style={{ zIndex: "999999" }}
+                                  label="Tanggal Awal"
+                                  value={this.state.tanggalDate}
+                                  onChange={(selectedDate) =>
+                                    this.handleDateChange(
+                                      "tanggalDate",
+                                      selectedDate
+                                    )
+                                  }
+                                  inputFormat="DD/MM/YYYY"
+                                />
+                              </LocalizationProvider>
+                            </div>
+                          </Form.Group>
+                        </Row>
+                        <button
+                          type="submit"
+                          style={{ marginTop: "2rem" }}
+                          className="btn-input btn-15 custom-btn"
+                          onClick={this.handleSubmit}>
+                          Simpan
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </Slide>
+              </Box>
+            </Box>
+          </div>
+        )}
 
         {this.state.isUpdate && (
           <>

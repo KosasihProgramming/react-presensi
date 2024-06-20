@@ -35,10 +35,10 @@ class Login extends Component {
             timer: 1500,
           },
           () => {
-            window.location.href = `/shift`;
+            window.location.href = `/`;
           }
         );
-        window.location.href = `/shift`;
+        window.location.href = `/`;
       } else {
         this.setState({ error: "Invalid credentials" });
       }

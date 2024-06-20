@@ -106,7 +106,7 @@ const Navigation = () => {
                             </Menu.Button>
                             {item.name === "Master Data" && (
                               <Menu.Items className="origin-top-left absolute mt-2 w-50 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                <div className="py-1">
+                                <div className="py-1" style={{ zIndex: "999" }}>
                                   {masterData.map((data, index) => (
                                     <Menu.Item key={index}>
                                       {({ active }) => (

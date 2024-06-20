@@ -94,10 +94,6 @@ class Home extends Component {
       });
   };
 
-  // <<<<<<< branchJadwal
-  //   handleEdit = (id_shift) => {
-  //     console.log("id: ", id_shift);
-  // =======
   handleEdit = (shift) => {
     const { id_shift, nama_shift, jam_masuk, jam_pulang, nominal, garansiFee } =
       shift;
@@ -118,8 +114,6 @@ class Home extends Component {
 
     const { idShift, namaShift, jamMasuk, jamPulang, nominal, garansiFee } =
       this.state;
-
-    // console.log(idShift);
 
     const patchData = {
       nama_shift: namaShift,
