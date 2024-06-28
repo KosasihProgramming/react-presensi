@@ -132,7 +132,8 @@ class Pulang extends Component {
                 text: "Berhasil melakukan presensi pulang",
               }).then((result) => {
                 if (result.value) {
-                  window.location.href = `/kehadiran`;
+                  window.location.href = `/`;
+                  // return <Navigate to="/kehadiran" />;
                 }
               });
             })

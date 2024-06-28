@@ -1221,13 +1221,22 @@ class DetailJadwal extends Component {
                   marginBottom: "2rem",
                   padding: "1rem",
                 }}>
-                <button
-                  type="submit"
-                  className="btn-input btn-15 custom-btn"
-                  onClick={this.handleExport}
-                  style={{ marginBottom: "2rem" }}>
-                  Export Data
-                </button>
+                <div className="flex gap-10">
+                  <button
+                    type="submit"
+                    className="btn-input btn-15 custom-btn"
+                    onClick={this.handleExport}
+                    style={{ marginBottom: "2rem" }}>
+                    Export Data
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-input btn-15 custom-btn"
+                    onClick={() => this.getDetailJadwal(this.state.idJadwal)}
+                    style={{ marginBottom: "2rem" }}>
+                    Refresh Data
+                  </button>
+                </div>
                 <MUIDataTable
                   title={"Data Detail Jadwal"}
                   data={dataDetail}

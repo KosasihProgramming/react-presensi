@@ -85,7 +85,7 @@ class Kehadiran extends Component {
 
       return [
         data.nama,
-        data.barcode,
+        data.barcode.toString().padStart(5, "0"),
         data.nama_shift,
         masukTime,
         <img
@@ -126,7 +126,7 @@ class Kehadiran extends Component {
       const pulangTime = `${formatJamPulang} WIB`;
       return [
         data.nama,
-        data.barcode,
+        data.barcode.toString().padStart(5, "0"),
         data.nama_shift,
         masukTime,
         pulangTime,

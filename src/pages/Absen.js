@@ -329,13 +329,14 @@ class Absen extends Component {
       nama_dokter_pengganti: dokterPengganti,
     };
 
-    // console.log("data: ", absenMasuk);
-
     axios
       .post(urlAPI + "/kehadiran", absenMasuk)
       .then((response) => {
         this.setState({
           barcode: "",
+          isPindahKlinik: 0,
+          isLanjutShift: 0,
+          isDokterPengganti: 0,
         });
         Swal.fire({
           icon: "success",
@@ -345,20 +346,16 @@ class Absen extends Component {
           focusConfirm: false,
           reverseButtons: true,
           focusCancel: true,
-        }).then((result) => {
-          if (result.value) {
-            window.location.href = `/kehadiran`;
-          }
         });
       })
       .catch((error) => {
         console.log("Error:", error);
       });
+
+    this.setState({ isProses: false });
   };
 
   render() {
-    // console.log("nama: ", this.state.namaKlinik);
-    // console.log("jadwal hari ini:", this.state.dataJadwalHariIni);
     return (
       <div>
         <ToastContainer />
