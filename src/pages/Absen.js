@@ -346,13 +346,17 @@ class Absen extends Component {
           focusConfirm: false,
           reverseButtons: true,
           focusCancel: true,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.setState({ isProses: false });
+          } else {
+            console.log("Batal atau tutup dialog");
+          }
         });
       })
       .catch((error) => {
         console.log("Error:", error);
       });
-
-    this.setState({ isProses: false });
   };
 
   render() {
