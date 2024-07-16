@@ -6,9 +6,10 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 
 const loggedInNavItems = [
+  { name: "Kehadiran", href: "/kehadiran" },
+  { name: "Absen", href: "/presensi" },
   { name: "Shift", href: "/shift" },
   { name: "Jadwal", href: "/jadwal-kehadiran" },
-  { name: "Master Data", href: "#" },
 ];
 
 const notLoggedInNavItems = [
@@ -91,52 +92,66 @@ const Navigation = () => {
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
-                    {isLoggedIn
-                      ? loggedInNavItems.map((item) => (
-                          <Menu key={item.name}>
-                            <Menu.Button
-                              as={Link}
-                              to={item.href}
-                              className={classNames(
-                                "text-gray-300 hover:bg-gray-700 hover:text-white",
-                                "rounded-md px-3 py-2 text-sm font-medium"
-                              )}>
-                              {item.name}
-                              {item.name === "Master Data"}
-                            </Menu.Button>
-                            {item.name === "Master Data" && (
-                              <Menu.Items className="origin-top-left absolute mt-2 w-50 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                <div className="py-1" style={{ zIndex: "999" }}>
-                                  {masterData.map((data, index) => (
-                                    <Menu.Item key={index}>
-                                      {({ active }) => (
-                                        <Link
-                                          to={data.href}
-                                          className={classNames(
-                                            active ? "bg-gray-100" : "",
-                                            "block px-4 py-2 text-sm text-gray-700"
-                                          )}>
-                                          {data.name}
-                                        </Link>
-                                      )}
-                                    </Menu.Item>
-                                  ))}
-                                </div>
-                              </Menu.Items>
-                            )}
-                          </Menu>
-                        ))
-                      : notLoggedInNavItems.map((item) => (
+                    {isLoggedIn ? (
+                      <>
+                        {loggedInNavItems.map((item) => (
                           <Link
-                            key={item.name}
                             to={item.href}
                             className={classNames(
                               "text-gray-300 hover:bg-gray-700 hover:text-white",
                               "rounded-md px-3 py-2 text-sm font-medium"
-                            )}>
+                            )}
+                          >
                             {item.name}
                           </Link>
                         ))}
+                        <Menu key={"Master Data"}>
+                          <Menu.Button
+                            as={Link}
+                            to="#"
+                            className={classNames(
+                              "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              "rounded-md px-3 py-2 text-sm font-medium"
+                            )}
+                          >
+                            Master Data
+                          </Menu.Button>
+
+                          <Menu.Items className="origin-top-left absolute mt-2 left-[30%] w-50 rounded-md shadow-lg bg-white top-[75%] z-[9999] ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="py-1" style={{ zIndex: "999" }}>
+                              {masterData.map((data, index) => (
+                                <Menu.Item key={index}>
+                                  {({ active }) => (
+                                    <Link
+                                      to={data.href}
+                                      className={classNames(
+                                        active ? "bg-gray-100" : "",
+                                        "block px-4 py-2 text-sm text-gray-700"
+                                      )}
+                                    >
+                                      {data.name}
+                                    </Link>
+                                  )}
+                                </Menu.Item>
+                              ))}
+                            </div>
+                          </Menu.Items>
+                        </Menu>
+                      </>
+                    ) : (
+                      notLoggedInNavItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className={classNames(
+                            "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            "rounded-md px-3 py-2 text-sm font-medium"
+                          )}
+                        >
+                          {item.name}
+                        </Link>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -148,7 +163,8 @@ const Navigation = () => {
                     className={classNames(
                       "text-gray-300 hover:bg-gray-700 hover:text-white",
                       "rounded-md px-3 py-2 text-sm font-medium"
-                    )}>
+                    )}
+                  >
                     Logout
                   </button>
                 ) : (
@@ -157,7 +173,8 @@ const Navigation = () => {
                     className={classNames(
                       "text-gray-300 hover:bg-gray-700 hover:text-white",
                       "rounded-md px-3 py-2 text-sm font-medium"
-                    )}>
+                    )}
+                  >
                     Login
                   </Link>
                 )}

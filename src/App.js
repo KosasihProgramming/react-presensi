@@ -81,6 +81,10 @@ function App() {
                 path="/rekap-shift-perawat-umum"
                 Component={RekapShiftPerawatUmum}
               />
+              <Route path="/login" Component={Login} />
+              <Route path="/kehadiran" Component={Kehadiran} />
+              <Route path="/presensi" Component={Absen} />
+              <Route path="/pulang/:id_kehadiran" Component={Pulang} />
             </>
           ) : (
             <>

@@ -7,6 +7,18 @@ import { konfersiJam } from "../function/konfersiJam";
 import { FiSearch } from "react-icons/fi";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  addDoc,
+  writeBatch,
+} from "firebase/firestore";
+import { db, dbImage } from "../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 // import { stat } from "fs";
 
 class Absen extends Component {
@@ -33,6 +45,30 @@ class Absen extends Component {
       dataJadwalHariIni: [],
       namaPegawai: "",
       namaKlinik: "",
+      dataPosisi: [
+        { text: "Kantor Pusat", value: "Kantor Pusat" },
+        { text: "Klinik Kosasih Kemiling", value: "Klinik Kosasih Kemiling" },
+        { text: "Klinik Kosasih Rajabasa", value: "Klinik Kosasih Rajabasa" },
+        { text: "Klinik Kosasih Urip", value: "Klinik Kosasih Urip" },
+        { text: "Klinik Kosasih Tirtayasa", value: "Klinik Kosasih Tirtayasa" },
+        { text: "Klinik Kosasih Palapa", value: "Klinik Kosasih Palapa" },
+        { text: "Klinik Kosasih Amanah", value: "Klinik Kosasih Amanah" },
+        { text: "Klinik Kosasih Panjang", value: "Klinik Kosasih Panjang" },
+        { text: "Klinik Kosasih Teluk", value: "Klinik Kosasih Teluk" },
+        {
+          text: "Klinik Kosasih Sumber Waras",
+          value: "Klinik Kosasih Sumber Waras",
+        },
+        {
+          text: "Griya Terapi Sehat Kemiling",
+          value: "Griya Terapi Sehat Kemiling",
+        },
+        {
+          text: "Griya Terapi Sehat Tirtayasa",
+          value: "Griya Terapi Sehat Tirtayasa",
+        },
+      ],
+      lokasiAbsen: "",
       isProses: false,
     };
   }
@@ -200,6 +236,7 @@ class Absen extends Component {
       namaPegawai,
       namaKlinik,
       dokterPengganti,
+      lokasiAbsen,
     } = this.state;
 
     const namaInstansi = this.state.namaKlinik;
@@ -327,6 +364,7 @@ class Absen extends Component {
       is_lanjut_shift: isLanjutShift,
       is_dokter_pengganti: isDokterPengganti,
       nama_dokter_pengganti: dokterPengganti,
+      lokasiAbsen,
     };
 
     axios
@@ -337,6 +375,7 @@ class Absen extends Component {
           isPindahKlinik: 0,
           isLanjutShift: 0,
           isDokterPengganti: 0,
+          lokasiAbsen: "",
         });
         Swal.fire({
           icon: "success",
@@ -391,7 +430,8 @@ class Absen extends Component {
                       />
                       <button
                         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                        onClick={this.handleSearch}>
+                        onClick={this.handleSearch}
+                      >
                         <FiSearch />
                       </button>
                     </div>
@@ -415,10 +455,24 @@ class Absen extends Component {
                             idShift: selectedIdShift,
                             harusMasuk: selectedHarusMasuk,
                           });
-                        }}>
+                        }}
+                      >
                         <option>Pilih Jadwal Anda</option>
                         {this.state.dataJadwalHariIni.map((data) => (
                           <option value={data.id}>{data.nama_shift}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="relative">
+                      <select
+                        className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                        onChange={(e) => {
+                          this.setState({ lokasiAbsen: e.target.value });
+                        }}
+                      >
+                        <option>Pilih Lokasi Anda</option>
+                        {this.state.dataPosisi.map((data) => (
+                          <option value={data.text}>{data.value}</option>
                         ))}
                       </select>
                     </div>
@@ -434,7 +488,8 @@ class Absen extends Component {
                         />
                         <label
                           htmlFor="checkbox"
-                          className="ml-2 text-gray-700">
+                          className="ml-2 text-gray-700"
+                        >
                           Saya pindah klinik
                         </label>
                       </div>
@@ -449,7 +504,8 @@ class Absen extends Component {
                         />
                         <label
                           htmlFor="checkbox"
-                          className="ml-2 text-gray-700">
+                          className="ml-2 text-gray-700"
+                        >
                           Saya lanjut shift
                         </label>
                       </div>
@@ -484,7 +540,8 @@ class Absen extends Component {
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
                         onClick={this.handleSubmit}
-                        disabled={this.state.isProses}>
+                        disabled={this.state.isProses}
+                      >
                         Hadir
                       </button>
                     </div>
