@@ -44,7 +44,7 @@ const Pulang = () => {
 
         setState((prevState) => ({
           ...prevState,
-          barCode: data.barcode,
+
           idJadwal: data.id_jadwal,
           idDetailJadwal: data.id_detail_jadwal,
           idShift: data.id_shift,
@@ -84,18 +84,7 @@ const Pulang = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setState((prevState) => ({ ...prevState, isProses: true }));
-    const {
-      barCode,
-      idKehadiran,
-      idJadwal,
-      idDetailJadwal,
-      idShift,
-      fotoKeluar,
-      jamMasuk,
-      jamKeluar,
-      durasi,
-      lembur,
-    } = state;
+    const { barCode, idKehadiran } = state;
 
     axios
       .get(`${urlAPI}/kehadiran/${state.idKehadiran}`)
