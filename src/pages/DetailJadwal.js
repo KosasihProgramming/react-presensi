@@ -28,9 +28,9 @@ class DetailJadwal extends Component {
     super(props);
     const { idJadwal } = this.props.params;
     this.state = {
-      tanggalDate: dayjs("2024-02-23T10:50"),
-      tanggalDateAwal: dayjs("2024-02-23T10:50"),
-      tanggalDateAkhir: dayjs("2024-02-23T10:50"),
+      tanggalDate: dayjs(),
+      tanggalDateAwal: dayjs(),
+      tanggalDateAkhir: dayjs(),
       tanggal: "",
       barcode: "",
       bulan: "",
@@ -720,6 +720,15 @@ class DetailJadwal extends Component {
     this.setState({ dataExportKalender: hasilAkhir, dataListkalender: data });
     console.log("akhir", hasilAkhir);
   };
+  formatStringTanggal = (tanggal) => {
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    const formattedDate = new Date(tanggal).toLocaleDateString(
+      "id-ID",
+      options
+    );
+    console.log(formattedDate);
+    return formattedDate;
+  };
   render() {
     // const tanggalNew = new Date(data.tanggal);
     // const tanggalTarget = tanggalNew.toLocaleDateString().split("T")[0];
@@ -727,7 +736,7 @@ class DetailJadwal extends Component {
       .slice()
       .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
       .map((data) => [
-        data.tanggal,
+        this.formatStringTanggal(data.tanggal),
         data.nama_shift,
         data.jam_masuk,
         data.jam_pulang,
@@ -751,12 +760,14 @@ class DetailJadwal extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <button
                   className="rounded-lg bg-yellow-400 px-4 py-2 font-bold cursor-pointer hover:bg-yellow-500"
-                  onClick={() => this.handleUpdateClick(data)}>
+                  onClick={() => this.handleUpdateClick(data)}
+                >
                   Edit
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
-                  onClick={() => this.handleDelete(data.detail_jadwal_id)}>
+                  onClick={() => this.handleDelete(data.detail_jadwal_id)}
+                >
                   Hapus
                 </button>
               </div>
@@ -826,14 +837,16 @@ class DetailJadwal extends Component {
                 <button
                   type="submit"
                   className="btn-input custom-btn btn-15"
-                  onClick={this.handleInput}>
+                  onClick={this.handleInput}
+                >
                   Tambah Detail Jadwal
                 </button>
                 <button
                   type="submit"
                   className="btn-input custom-btn btn-15"
                   style={{ width: "19rem" }}
-                  onClick={this.handleInputOtomatis}>
+                  onClick={this.handleInputOtomatis}
+                >
                   Tambah Detail Jadwal Otomatis
                 </button>
               </div>
@@ -852,17 +865,21 @@ class DetailJadwal extends Component {
                 backgroundColor: "background.default",
                 height: this.state.isInput ? "auto" : this.state.height,
               }}
-              className="rounded-lg bg-white shadow-lg my-5">
+              className="rounded-lg bg-white shadow-lg my-5"
+            >
               <Box
                 sx={{ p: 2, height: "auto", overflowY: "scroll" }}
-                ref={this.containerRef}>
+                ref={this.containerRef}
+              >
                 <Slide
                   in={this.state.isInput}
-                  container={this.containerRef.current}>
+                  container={this.containerRef.current}
+                >
                   {
                     <div
                       className="flex flex-col p-10"
-                      style={{ backgroundColor: "white" }}>
+                      style={{ backgroundColor: "white" }}
+                    >
                       <h6 className="title-2">Input Detail Jadwal Otomatis</h6>
                       <div className="form-input">
                         <Row
@@ -870,7 +887,8 @@ class DetailJadwal extends Component {
                           style={{
                             justifyContent: "flex-start",
                             gap: "2rem",
-                          }}>
+                          }}
+                        >
                           <Form.Group className="form-field">
                             <Form.Label className="label-text">
                               Shift :
@@ -901,7 +919,8 @@ class DetailJadwal extends Component {
                               style={{ width: "8rem" }}
                               placeholder="Nama"
                               className="nama-field"
-                              value={this.state.jamMasuk}>
+                              value={this.state.jamMasuk}
+                            >
                               {this.state.jamMasuk}
                             </div>
                           </Form.Group>
@@ -915,7 +934,8 @@ class DetailJadwal extends Component {
                               placeholder="Nama"
                               style={{ width: "8rem" }}
                               className="nama-field"
-                              value={this.state.jamKeluar}>
+                              value={this.state.jamKeluar}
+                            >
                               {this.state.jamKeluar}
                             </div>
                           </Form.Group>
@@ -924,7 +944,8 @@ class DetailJadwal extends Component {
                               <LocalizationProvider
                                 dateAdapter={AdapterDayjs}
                                 className="datepicker"
-                                adapterLocale="en-gb">
+                                adapterLocale="en-gb"
+                              >
                                 <DatePicker
                                   name="tanggalAwal"
                                   locale="id"
@@ -947,7 +968,8 @@ class DetailJadwal extends Component {
                               <LocalizationProvider
                                 dateAdapter={AdapterDayjs}
                                 className="datepicker"
-                                adapterLocale="en-gb">
+                                adapterLocale="en-gb"
+                              >
                                 <DatePicker
                                   name="tanggalAwal"
                                   locale="id"
@@ -970,7 +992,8 @@ class DetailJadwal extends Component {
                           type="submit"
                           style={{ marginTop: "2rem" }}
                           className="btn-input btn-15 custom-btn"
-                          onClick={this.handleSubmitOtomatis}>
+                          onClick={this.handleSubmitOtomatis}
+                        >
                           Simpan
                         </button>
                       </div>
@@ -991,17 +1014,21 @@ class DetailJadwal extends Component {
                 backgroundColor: "background.default",
                 height: this.state.isInput ? "auto" : this.state.height,
               }}
-              className="rounded-lg bg-white shadow-lg my-5">
+              className="rounded-lg bg-white shadow-lg my-5"
+            >
               <Box
                 sx={{ p: 2, height: "auto", overflowY: "scroll" }}
-                ref={this.containerRef}>
+                ref={this.containerRef}
+              >
                 <Slide
                   in={this.state.isInput}
-                  container={this.containerRef.current}>
+                  container={this.containerRef.current}
+                >
                   {
                     <div
                       className="flex flex-col p-10"
-                      style={{ backgroundColor: "white" }}>
+                      style={{ backgroundColor: "white" }}
+                    >
                       <h6 className="title-2">Input Detail Jadwal</h6>
                       <div className="form-input">
                         <Row
@@ -1009,7 +1036,8 @@ class DetailJadwal extends Component {
                           style={{
                             justifyContent: "flex-start",
                             gap: "2rem",
-                          }}>
+                          }}
+                        >
                           <Form.Group className="form-field">
                             <Form.Label className="label-text">
                               Shift :
@@ -1040,7 +1068,8 @@ class DetailJadwal extends Component {
                               style={{ width: "10rem" }}
                               placeholder="Nama"
                               className="nama-field"
-                              value={this.state.jamMasuk}>
+                              value={this.state.jamMasuk}
+                            >
                               {this.state.jamMasuk}
                             </div>
                           </Form.Group>
@@ -1055,7 +1084,8 @@ class DetailJadwal extends Component {
                               placeholder="Nama"
                               style={{ width: "10rem" }}
                               className="nama-field"
-                              value={this.state.jamKeluar}>
+                              value={this.state.jamKeluar}
+                            >
                               {this.state.jamKeluar}
                             </div>
                           </Form.Group>
@@ -1068,7 +1098,8 @@ class DetailJadwal extends Component {
                               <LocalizationProvider
                                 dateAdapter={AdapterDayjs}
                                 className="datepicker"
-                                adapterLocale="en-gb">
+                                adapterLocale="en-gb"
+                              >
                                 <DatePicker
                                   name="tanggalAwal"
                                   locale="id"
@@ -1091,7 +1122,8 @@ class DetailJadwal extends Component {
                           type="submit"
                           style={{ marginTop: "2rem" }}
                           className="btn-input btn-15 custom-btn"
-                          onClick={this.handleSubmit}>
+                          onClick={this.handleSubmit}
+                        >
                           Simpan
                         </button>
                       </div>
@@ -1111,7 +1143,8 @@ class DetailJadwal extends Component {
                 <div className="form-input">
                   <Row
                     className="form-row"
-                    style={{ justifyContent: "flex-start", gap: "2rem" }}>
+                    style={{ justifyContent: "flex-start", gap: "2rem" }}
+                  >
                     <Form.Group className="form-field">
                       <Form.Label className="label-text">Shift :</Form.Label>
                       <div className="dropdown-container">
@@ -1138,7 +1171,8 @@ class DetailJadwal extends Component {
                         style={{ width: "10rem" }}
                         placeholder="Nama"
                         className="nama-field"
-                        value={this.state.jamMasuk}>
+                        value={this.state.jamMasuk}
+                      >
                         {this.state.jamMasuk}
                       </div>
                     </Form.Group>
@@ -1153,7 +1187,8 @@ class DetailJadwal extends Component {
                         placeholder="Nama"
                         style={{ width: "10rem" }}
                         className="nama-field"
-                        value={this.state.jamKeluar}>
+                        value={this.state.jamKeluar}
+                      >
                         {this.state.jamKeluar}
                       </div>
                     </Form.Group>
@@ -1164,7 +1199,8 @@ class DetailJadwal extends Component {
                         <LocalizationProvider
                           dateAdapter={AdapterDayjs}
                           className="datepicker"
-                          adapterLocale="en-gb">
+                          adapterLocale="en-gb"
+                        >
                           <DatePicker
                             name="tanggalDate"
                             locale="id"
@@ -1184,7 +1220,8 @@ class DetailJadwal extends Component {
                     type="submit"
                     style={{ marginTop: "2rem" }}
                     className="btn-input btn-15 custom-btn"
-                    onClick={this.handleUpdate}>
+                    onClick={this.handleUpdate}
+                  >
                     Update
                   </button>
                 </div>
@@ -1195,18 +1232,21 @@ class DetailJadwal extends Component {
 
         <div
           className="rounded-lg bg-white shadow-lg"
-          style={{ paddingBottom: "1rem" }}>
+          style={{ paddingBottom: "1rem" }}
+        >
           <div className="btn-group">
             <button
               type="submit"
               className="btn-input custom-btn btn-15"
-              onClick={this.handleTab}>
+              onClick={this.handleTab}
+            >
               Tabel Detail Jadwal
             </button>
             <button
               type="submit"
               className="btn-input custom-btn btn-15"
-              onClick={this.handleTab2}>
+              onClick={this.handleTab2}
+            >
               Kalender Detail Jadwal
             </button>
           </div>
@@ -1220,20 +1260,23 @@ class DetailJadwal extends Component {
                   borderRadius: "8px",
                   marginBottom: "2rem",
                   padding: "1rem",
-                }}>
+                }}
+              >
                 <div className="flex gap-10">
                   <button
                     type="submit"
                     className="btn-input btn-15 custom-btn"
                     onClick={this.handleExport}
-                    style={{ marginBottom: "2rem" }}>
+                    style={{ marginBottom: "2rem" }}
+                  >
                     Export Data
                   </button>
                   <button
                     type="submit"
                     className="btn-input btn-15 custom-btn"
                     onClick={() => this.getDetailJadwal(this.state.idJadwal)}
-                    style={{ marginBottom: "2rem" }}>
+                    style={{ marginBottom: "2rem" }}
+                  >
                     Refresh Data
                   </button>
                 </div>
@@ -1252,30 +1295,34 @@ class DetailJadwal extends Component {
               <div className="kalender-main">
                 <div
                   className="table-kalender"
-                  style={{ flexDirection: "column" }}>
+                  style={{ flexDirection: "column" }}
+                >
                   <button
                     type="submit"
                     className="btn-input btn-15 custom-btn"
                     style={{ marginBottom: "2rem" }}
-                    onClick={this.handleExportKalender}>
+                    onClick={this.handleExportKalender}
+                  >
                     Export Data
                   </button>
-                  <div className="table-kalender">
+                  <div className="flex justify-center items-center w-full p-4 gap-4 flex-wrap rounded-md border border-teal-600">
                     {this.state.dataListkalender.map((item, index) => (
-                      <div className="kalender-content" key={index}>
-                        <div className="field-table">{item.tanggal}</div>
+                      <div
+                        className="w-[13rem] border border-teal-600 rounded-md shadow-md"
+                        key={index}
+                      >
+                        <div className="p-2 bg-teal-500 text-white w-full rounded-tl-md roundedrl-md flex justify-center items-center">
+                          {this.formatStringTanggal(item.tanggal)}
+                        </div>
                         {item.nama_shift.map((shift, shiftIndex) => (
                           <div
-                            className="row-table"
-                            style={{
-                              backgroundColor:
-                                shift.nama.nama == "Libur"
-                                  ? "#F55050"
-                                  : "white",
-                              color:
-                                shift.nama.nama == "Libur" ? "white" : "black",
-                            }}
-                            key={shiftIndex}>
+                            className={`flex justify-center py-2 items-center rounded-bl-md rounded-br-md ${
+                              shift.nama.nama == "Libur"
+                                ? "bg-red-400 text-white"
+                                : "bg-white "
+                            }`}
+                            key={shiftIndex}
+                          >
                             {shift.nama.nama}
                           </div>
                         ))}

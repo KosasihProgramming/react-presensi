@@ -17,28 +17,24 @@ class Login extends Component {
     e.preventDefault();
     try {
       const response = await axios.post(`${urlAPI}/login/check`, {
-        usere: this.state.username,
-        passworde: this.state.password,
+        username: this.state.username, // Updated field name
+        password: this.state.password, // Updated field name
       });
       console.log(response.data);
       if (response.data.status === "success") {
         sessionStorage.setItem(
           "user",
-          JSON.stringify(response.data.user.usere)
+          JSON.stringify(response.data.user.username)
         );
-        Swal.fire(
-          {
-            icon: "success",
-            title: "Berhasil",
-            text: "Selamat, Anda Berhasil Masuk ",
-            showConfirmButton: false,
-            timer: 1500,
-          },
-          () => {
-            window.location.href = `/`;
-          }
-        );
-        window.location.href = `/`;
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Selamat, Anda Berhasil Masuk",
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => {
+          window.location.href = `/`;
+        });
       } else {
         this.setState({ error: "Invalid credentials" });
       }
@@ -96,7 +92,8 @@ class Login extends Component {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
                 Sign in
               </button>
             </div>

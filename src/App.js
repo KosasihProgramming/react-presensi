@@ -20,6 +20,7 @@ import RekapKehadiranPerawat from "./pages/rekapKehadiran/RekapPerawat";
 import RekapKehadiranPerawatGigi from "./pages/rekapKehadiran/RekapPerawatGigi";
 import RekapKehadiranFarmasi from "./pages/rekapKehadiran/RekapFarmasi";
 import RekapKehadiranPegawai from "./pages/rekapKehadiran/RekapPegawaiKantor";
+import DataPegawai from "./pages/dataPegawai";
 
 function App() {
   const isLoggedIn = sessionStorage.getItem("user");
@@ -83,6 +84,7 @@ function App() {
               />
               <Route path="/login" Component={Login} />
               <Route path="/kehadiran" Component={Kehadiran} />
+              <Route path="/data-pegawai" Component={DataPegawai} />
               <Route path="/presensi" Component={Absen} />
               <Route path="/pulang/:id_kehadiran" Component={Pulang} />
             </>

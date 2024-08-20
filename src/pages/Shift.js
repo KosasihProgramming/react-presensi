@@ -218,12 +218,14 @@ class Home extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <button
                   className="rounded-lg bg-yellow-400 px-4 py-2 font-bold cursor-pointer hover:bg-yellow-500"
-                  onClick={() => this.handleEdit(data)}>
+                  onClick={() => this.handleEdit(data)}
+                >
                   Edit
                 </button>
                 <button
                   className="rounded-lg bg-red-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-red-700"
-                  onClick={() => this.handleDelete(data.id_shift)}>
+                  onClick={() => this.handleDelete(data.id_shift)}
+                >
                   Hapus
                 </button>
               </div>
@@ -263,7 +265,7 @@ class Home extends Component {
                   <input
                     type="text"
                     placeholder="Nama Shift"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-teal-500"
                     value={this.state.namaShift}
                     onChange={(e) =>
                       this.setState({ namaShift: e.target.value })
@@ -273,7 +275,7 @@ class Home extends Component {
                   <input
                     type="time"
                     placeholder="Jam Masuk"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-teal-500"
                     value={this.state.jamMasuk}
                     onChange={(e) =>
                       this.setState({ jamMasuk: e.target.value })
@@ -283,7 +285,7 @@ class Home extends Component {
                   <input
                     type="time"
                     placeholder="Jam Pulang"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-teal-500"
                     value={this.state.jamPulang}
                     onChange={(e) =>
                       this.setState({ jamPulang: e.target.value })
@@ -293,7 +295,7 @@ class Home extends Component {
                   <input
                     type="number"
                     placeholder="Nominal"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-teal-500"
                     value={this.state.nominal}
                     onChange={(e) => this.setState({ nominal: e.target.value })}
                     required
@@ -301,7 +303,7 @@ class Home extends Component {
                   <input
                     type="number"
                     placeholder="Garansi Fee"
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-blue-500"
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring focus:border-teal-500"
                     value={this.state.garansiFee}
                     onChange={(e) =>
                       this.setState({ garansiFee: e.target.value })
@@ -311,15 +313,17 @@ class Home extends Component {
                   {this.state.isEdit ? (
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                      onClick={this.handleUpdate}>
+                      className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 focus:outline-none focus:bg-teal-600"
+                      onClick={this.handleUpdate}
+                    >
                       Update
                     </button>
                   ) : (
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                      onClick={this.handleSave}>
+                      className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 focus:outline-none focus:bg-teal-600"
+                      onClick={this.handleSave}
+                    >
                       Simpan
                     </button>
                   )}

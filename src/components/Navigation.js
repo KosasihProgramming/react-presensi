@@ -10,6 +10,7 @@ const loggedInNavItems = [
   { name: "Absen", href: "/presensi" },
   { name: "Shift", href: "/shift" },
   { name: "Jadwal", href: "/jadwal-kehadiran" },
+  { name: "Data Pegawai", href: "/data-pegawai" },
 ];
 
 const notLoggedInNavItems = [

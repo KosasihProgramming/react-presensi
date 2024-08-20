@@ -104,6 +104,7 @@ class RekapKehadiranPegawai extends Component {
       );
       this.setState({ rekapKehadiran: response.data });
       this.formatCSVData(response.data);
+      console.log("datakehadiran", response.data);
     } catch (error) {
       console.log("Error pada tanggal:", error);
     }
@@ -153,32 +154,18 @@ class RekapKehadiranPegawai extends Component {
     const dataArrayString = sortedData.map((obj, index) => {
       return [
         index + 1,
-        obj.tanggal,
+        this.formatTanggal(obj.tanggal),
         obj.nama_perawat,
         obj.nama_shift,
+        obj.jam_masuk,
+        obj.jam_keluar,
         obj.telat,
         obj.nominal_shift,
         obj.denda_telat,
         parseInt(obj.nominal_shift) - parseInt(obj.denda_telat),
       ];
     });
-    const transformedArray = dataArrayString.map((item, idx) => {
-      const [index, tanggal, nama, shift, telat, nominal, denda, total] = item;
 
-      // If the current date is the same as the previous one, set it to an empty string
-      return [
-        index,
-        idx > 0 && tanggal === dataArrayString[idx - 1][1]
-          ? ""
-          : this.formatTanggal(tanggal),
-        nama,
-        shift,
-        telat,
-        nominal,
-        denda,
-        total,
-      ];
-    });
     const propertyNames = [
       ["Rekap Kehadiran Staff kantor Pusat"],
       [""],
@@ -190,14 +177,16 @@ class RekapKehadiranPegawai extends Component {
         "Tanggal",
         "Nama Pegawai",
         "Nama Shift",
-        "Telat",
+        "Jam Masuk",
+        "Jam Pulang",
+        "Telat (Menit)",
         "Nominal Kehadiran",
         "Denda Telat",
         "Total Nominal Kehadiran",
       ],
     ];
 
-    this.setState({ judul: propertyNames, dataExport: transformedArray });
+    this.setState({ judul: propertyNames, dataExport: dataArrayString });
   };
 
   convertToCSV = (array) => {
@@ -227,20 +216,28 @@ class RekapKehadiranPegawai extends Component {
     );
   };
   formatTanggal = (tanggal) => {
-    const hari = dayjs(tanggal).locale("id").format("dddd");
-    const bulan = dayjs(tanggal).locale("id").format("MMMM");
-    const tahun = dayjs(tanggal).locale("id").format("YYYY");
-    const hasil = tanggal.substring(8, 10) + " " + bulan + " " + tahun;
-    console.log("tanggal", dayjs(tanggal).locale("id").format("MMMM"));
-
-    return hasil;
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    const formattedDate = new Date(tanggal).toLocaleDateString(
+      "id-ID",
+      options
+    );
+    console.log(formattedDate);
+    return formattedDate;
+  };
+  formatJam = (hour) => {
+    const timeOnly = new Date(hour).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "UTC", // Optional: Use this if you want to keep the time in UTC
+    });
+    return timeOnly;
   };
   render() {
     const { rekapKehadiran } = this.state;
     console.log(rekapKehadiran);
 
     const dataTabel = rekapKehadiran.map((item) => [
-      item.tanggal,
+      this.formatTanggal(item.tanggal),
       item.nama_perawat,
       item.nama_shift,
       item.telat ? (
@@ -409,7 +406,7 @@ class RekapKehadiranPegawai extends Component {
                 <h2>Memproses...</h2>
               ) : (
                 <MUIDataTable
-                  title={"Data Rekap Dokter Umum"}
+                  title={"Data Rekap Pegawai Kantor"}
                   data={dataTabel}
                   columns={columnsData}
                   options={options}
