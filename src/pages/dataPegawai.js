@@ -45,12 +45,12 @@ class DataPegawai extends Component {
         console.log(response);
 
         const jumlahPegawai = response.data.length;
+
         this.setState({
           dataPegawai: response.data,
-          barcode: this.formatID(parseInt(jumlahPegawai) + 1),
+          barcode: parseInt(response.data[jumlahPegawai - 1].id) + 1,
           isShow: true,
         });
-
         console.log(response.data, "datavpegawai");
       })
       .catch((error) => {

@@ -34,3 +34,9 @@
     @apply font-bold text-blue-500 text-4xl mb-4;
   }
 }
+
+@media (max-width: 12px) {
+  body {
+    display: none;
+  }
+}

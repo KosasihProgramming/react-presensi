@@ -137,6 +137,42 @@ class RekapKehadiranPegawai extends Component {
     }
   };
 
+  cekDataIzin = async (bulan, tahun) => {
+    const arg = { bulan, tahun };
+
+    try {
+      const response = await axios.post(
+        `${urlAPI}/rekap-kehadiran-pegawai-kantor/cek-izin`,
+        arg,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const hasilAkhir = response.data.reduce((acc, izin) => {
+        // Cek apakah sudah ada izin dengan nama yang sama di acc
+        const existingizin = acc.find(
+          (item) =>
+            item.tanggal === izin.tanggal && item.barcode === izin.barcode
+        );
+
+        if (existingizin) {
+          // Jika ada, jumlahkan nilai izin tersebut
+          existingizin.durasi += parseInt(izin.durasi);
+        } else {
+          // Jika belum ada, tambahkan izin ke acc
+          acc.push({ ...izin });
+        }
+
+        return acc;
+      }, []);
+      return hasilAkhir;
+    } catch (error) {
+      console.log("Error pada tanggal:", error);
+    }
+  };
+
   handleSearch = (e) => {
     e.preventDefault();
     this.setState({ isProses: true });
@@ -146,12 +182,31 @@ class RekapKehadiranPegawai extends Component {
     this.setState({ isProses: false });
   };
 
-  formatCSVData = (data) => {
+  formatCSVData = async (data) => {
     const sortedData = data.sort(
       (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
     );
-    console.log(sortedData, "sort");
-    const dataArrayString = sortedData.map((obj, index) => {
+    const { bulan, tahun } = this.state;
+    const dataIzin = await this.cekDataIzin(bulan, tahun);
+    const gabungan = sortedData.map((s) => {
+      // Cari nilai siswa berdasarkan idsiswa
+      const izin = dataIzin.find(
+        (n) => n.barcode === "0" + s.barcode && n.tanggal === s.tanggal
+      );
+      if (izin) {
+        console.log("izin ditemukan", izin);
+      }
+
+      // Gabungkan objek siswa dengan nilai
+      return {
+        ...s,
+        izin: izin ? izin.durasi : 0, // Jika tidak ada nilai, berikan null
+        jenis: izin ? izin.jenisIzin : "Hadir",
+      };
+    });
+    console.log(dataIzin, "sort");
+    console.log(gabungan, "gabung");
+    const dataArrayString = gabungan.map((obj, index) => {
       return [
         index + 1,
         this.formatTanggal(obj.tanggal),
@@ -160,9 +215,11 @@ class RekapKehadiranPegawai extends Component {
         obj.jam_masuk,
         obj.jam_keluar,
         obj.telat,
-        obj.nominal_shift,
+        parseInt(obj.izin),
+        obj.jenis,
+        // obj.nominal_shift,
         obj.denda_telat,
-        parseInt(obj.nominal_shift) - parseInt(obj.denda_telat),
+        // parseInt(obj.nominal_shift) - parseInt(obj.denda_telat),
       ];
     });
 
@@ -180,9 +237,11 @@ class RekapKehadiranPegawai extends Component {
         "Jam Masuk",
         "Jam Pulang",
         "Telat (Menit)",
-        "Nominal Kehadiran",
+        "Izin (Menit)",
+        "status",
+        // "Nominal Kehadiran",
         "Denda Telat",
-        "Total Nominal Kehadiran",
+        // "Total Nominal Kehadiran",
       ],
     ];
 
@@ -224,13 +283,14 @@ class RekapKehadiranPegawai extends Component {
     console.log(formattedDate);
     return formattedDate;
   };
-  formatJam = (hour) => {
-    const timeOnly = new Date(hour).toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "UTC", // Optional: Use this if you want to keep the time in UTC
-    });
-    return timeOnly;
+  formatJam = (jam) => {
+    const formatTime = (time) => {
+      return time.length > 5 ? time.substring(0, 5) : time;
+    };
+
+    // Ubah jam1 dan jam2 menjadi format HH:mm
+    const formattedJam1 = formatTime(jam);
+    return formattedJam1;
   };
   render() {
     const { rekapKehadiran } = this.state;

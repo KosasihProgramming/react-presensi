@@ -39,6 +39,8 @@ class JadwalKehadiran extends Component {
       dataJadwal: [],
       isUpdate: false,
       idJadwal: "",
+      searchQuery: "",
+      selectedBulan: null,
       bulanTahun: dayjs("2024-02-23T10:50"),
     };
   }
@@ -158,6 +160,27 @@ class JadwalKehadiran extends Component {
     return tanggalAwal;
   }
 
+  handleSearchChange = (event) => {
+    this.setState({ searchQuery: event.target.value });
+  };
+
+  handleBulanFilterChange = (selectedOption) => {
+    this.setState({ selectedBulan: selectedOption });
+  };
+
+  getFilteredData = () => {
+    const { dataJadwal, searchQuery, selectedBulan } = this.state;
+
+    return dataJadwal.filter((data) => {
+      const matchNama = data.nama
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchBulan =
+        selectedBulan === null || data.bulan === selectedBulan.value;
+
+      return matchNama && matchBulan;
+    });
+  };
   handleDateChange = (name, selectedDate) => {
     // Convert selectedDate to Dayjs object if it's not already
     const dayjsDate = dayjs(selectedDate);
@@ -474,14 +497,15 @@ class JadwalKehadiran extends Component {
     return formattedDate;
   };
   render() {
-    const dataList = this.state.dataJadwal.map((data) => []);
+    const filteredData = this.getFilteredData();
+    const dataList = filteredData.map((data) => []);
     const columns = [
       {
         name: "Nama Dokter",
 
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <td>
                 <div style={{ width: "100%" }} className="droplink">
@@ -502,7 +526,7 @@ class JadwalKehadiran extends Component {
 
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <td>
                 <div style={{ width: "100%" }} className="droplink">
@@ -523,7 +547,7 @@ class JadwalKehadiran extends Component {
 
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <td>
                 <div style={{ width: "100%" }} className="droplink">
@@ -544,7 +568,7 @@ class JadwalKehadiran extends Component {
 
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <td>
                 <div style={{ width: "100%" }} className="droplink">
@@ -565,7 +589,7 @@ class JadwalKehadiran extends Component {
 
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <td>
                 <div style={{ width: "100%" }} className="droplink">
@@ -586,7 +610,7 @@ class JadwalKehadiran extends Component {
 
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <td>
                 <div style={{ width: "100%" }} className="droplink">
@@ -607,7 +631,7 @@ class JadwalKehadiran extends Component {
         name: "Aksi",
         options: {
           customBodyRender: (value, tableMeta, updateValue) => {
-            const data = this.state.dataJadwal[tableMeta.rowIndex];
+            const data = filteredData[tableMeta.rowIndex];
             return (
               <div className="flex flex-row justify-center gap-2">
                 <button
@@ -640,6 +664,20 @@ class JadwalKehadiran extends Component {
       value: data.id,
       label: data.nama, // Ganti dengan properti yang sesuai dari objek dokter
     }));
+    const months = [
+      { value: "Januari", label: "Januari" },
+      { value: "Februari", label: "Februari" },
+      { value: "Maret", label: "Maret" },
+      { value: "April", label: "April" },
+      { value: "Mei", label: "Mei" },
+      { value: "Juni", label: "Juni" },
+      { value: "Juli", label: "Juli" },
+      { value: "Agustus", label: "Agustus" },
+      { value: "September", label: "September" },
+      { value: "Oktober", label: "Oktober" },
+      { value: "November", label: "November" },
+      { value: "Desember", label: "Desember" },
+    ];
     return (
       <div className="container mx-auto mt-2">
         <div className="rounded-lg bg-white shadow-lg my-5">
@@ -887,6 +925,29 @@ class JadwalKehadiran extends Component {
           className="rounded-lg bg-white shadow-lg"
           style={{ padding: "1rem 0" }}
         >
+          <div className="w-full flex justify-start gap-10 items-center px-10 mt-5">
+            <div className="w-[20rem] rounded-md  border border-teal-600 shadow-md cursor-pointer">
+              <Select
+                onChange={(selectedOption) =>
+                  this.handleBulanFilterChange(selectedOption)
+                }
+                name="barcodeTerpilih"
+                inputId="input"
+                placeholder="Pilih Bulan..."
+                className="border-none"
+                options={months}
+                isSearchable={true}
+                isClearable
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari Nama Dokter"
+              className="p-2 border rounded-md border-teal-600 w-[15rem] cursor-pointer shadow-md"
+              value={this.state.searchQuery}
+              onChange={this.handleSearchChange}
+            />
+          </div>
           <div
             className="flex flex-col p-10"
             style={{

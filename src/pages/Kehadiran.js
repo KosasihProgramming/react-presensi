@@ -15,7 +15,8 @@ class Kehadiran extends Component {
     this.state = {
       dataKehadiran: [],
       dataKepulangan: [],
-      isSudahPulang: false,
+      dataIzin: [],
+      isSudahPulang: "tidak",
       tanggalFilter: new Date().toLocaleDateString(),
     };
   }
@@ -23,6 +24,7 @@ class Kehadiran extends Component {
   componentDidMount = () => {
     this.getAllDataKehadiran();
     this.getAllDataKepulangan();
+    this.getAllDataIzin();
   };
 
   getAllDataKehadiran = () => {
@@ -31,6 +33,19 @@ class Kehadiran extends Component {
       .then((response) => {
         this.setState({ dataKehadiran: response.data });
         // console.log("Belum pulang: ", response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  getAllDataIzin = () => {
+    axios
+      .get(`${urlAPI}/kehadiran/izin/today`)
+      .then((response) => {
+        console.log("izizn: ", response.data);
+
+        this.setState({ dataIzin: response.data });
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -66,6 +81,13 @@ class Kehadiran extends Component {
         console.error("Error Fetching data", err);
       });
   };
+  formatToTime(dateString) {
+    const date = new Date(dateString);
+    const hours = String(date.getHours()).padStart(2, "0"); // Pastikan dua digit untuk jam
+    const minutes = String(date.getMinutes()).padStart(2, "0"); // Pastikan dua digit untuk menit
+
+    return `${hours}:${minutes}`;
+  }
 
   render() {
     const dataHadir = this.state.dataKehadiran.map((data) => {
@@ -87,7 +109,8 @@ class Kehadiran extends Component {
         data.nama,
         data.barcode.toString().padStart(5, "0"),
         data.nama_shift,
-        masukTime,
+        data.jam_masuk,
+        data.tanggal,
         <img
           className="w-24 rounded-full"
           src={`${urlAPI}/uploads/${data.foto_masuk}`}
@@ -128,8 +151,9 @@ class Kehadiran extends Component {
         data.nama,
         data.barcode.toString().padStart(5, "0"),
         data.nama_shift,
-        masukTime,
-        pulangTime,
+        data.jam_masuk,
+        data.jam_keluar,
+
         data.tanggal,
         <img
           className="w-24 rounded-full"
@@ -144,11 +168,77 @@ class Kehadiran extends Component {
       ];
     });
 
+    const dataIzib = this.state.dataIzin.map((data) => {
+      const masukDate = new Date(data.waktuMulai);
+
+      const tanggal = masukDate.getDate();
+      const bulan = masukDate.getMonth() + 1;
+      const tahun = masukDate.getFullYear();
+      const jam = masukDate.getHours();
+      const menit = masukDate.getMinutes();
+      const detik = masukDate.getSeconds();
+
+      const formatTanggal = `${tanggal}-${bulan}-${tahun}`;
+      const formatJam = `${jam}:${menit}:${detik}`;
+
+      const masukTime = `${formatJam} WIB`;
+
+      const pulangDate = new Date(data.waktuSelesai);
+
+      const tanggalPulang = pulangDate.getDate();
+      const bulanPulang = pulangDate.getMonth() + 1;
+      const tahunPulang = pulangDate.getFullYear();
+      const jamPulang = pulangDate.getHours();
+      const menitPulang = pulangDate.getMinutes();
+      const detikPulang = pulangDate.getSeconds();
+
+      const formatTanggalPulang = `${tanggalPulang}-${bulanPulang}-${tahunPulang}`;
+      const formatJamPulang = `${jamPulang}:${menitPulang}:${detikPulang}`;
+
+      const pulangTime = `${formatJamPulang} WIB`;
+      return [
+        data.nama,
+        data.jenisIzin,
+        data.alasan,
+        data.waktuMulai + " WIB",
+        data.waktuSelesai + " WIB",
+        data.tanggal,
+
+        data.durasi + " Menit",
+        <div>
+          {data.bukti !== null ? (
+            <>
+              <img
+                className="w-24 rounded-md"
+                src={`${urlAPI}/uploads/${data.bukti}`}
+                alt={data.bukti}
+              />
+            </>
+          ) : (
+            <>
+              <h3>Tidak Ada Bukti</h3>
+            </>
+          )}
+        </div>,
+      ];
+    });
+    console.log(dataIzib);
+    const columnsIzin = [
+      "Nama Pegawai",
+      "jenis",
+      "Alasan",
+      "Jam Mulai",
+      "Jam Selesai",
+      "Tanggal",
+      "Durasi",
+      "Foto Bukti",
+    ];
     const columnsHadir = [
       "Nama Dokter",
       "Barcode",
       "Shift",
       "Jam Masuk",
+      "Tanggal",
       "Foto Masuk",
       {
         name: "Aksi",
@@ -159,7 +249,8 @@ class Kehadiran extends Component {
               <div className="flex flex-row justify-center gap-2">
                 <Link
                   className="rounded-lg bg-cyan-500 px-4 py-2 font-bold text-white cursor-pointer hover:bg-cyan-700"
-                  to={`/pulang/${item.id_kehadiran}`}>
+                  to={`/pulang/${item.id_kehadiran}`}
+                >
                   Absen Pulang
                 </Link>
               </div>
@@ -188,11 +279,6 @@ class Kehadiran extends Component {
       filterDate: new Date().toLocaleDateString(),
     };
 
-    const { isSudahPulang, dataKehadiran, dataKepulangan } = this.state;
-
-    const selectedData = isSudahPulang ? dataKepulangan : dataKehadiran;
-    const selectedColumns = isSudahPulang ? columnsPulang : columnsHadir;
-
     console.log(this.state.tanggalFilter);
 
     return (
@@ -205,11 +291,13 @@ class Kehadiran extends Component {
                   className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white "
                   onChange={(e) =>
                     this.setState({
-                      isSudahPulang: e.target.value === "true",
+                      isSudahPulang: e.target.value,
                     })
-                  }>
-                  <option value={false}>Belum Pulang</option>
-                  <option value={true}>Sudah Pulang</option>s
+                  }
+                >
+                  <option value={"tidak"}>Belum Pulang</option>
+                  <option value={"ya"}>Sudah Pulang</option>
+                  <option value={"izin"}>Izin / Sakit</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <HiOutlineSelector />
@@ -230,18 +318,28 @@ class Kehadiran extends Component {
               </div>
             </div>
             <div className="flex flex-col pb-10 px-7">
-              {this.state.isSudahPulang ? (
+              {this.state.isSudahPulang == "ya" && (
                 <MUIDataTable
                   title={"Data Kepulangan"}
                   data={dataPulang}
                   columns={columnsPulang}
                   options={options}
                 />
-              ) : (
+              )}
+
+              {this.state.isSudahPulang == "tidak" && (
                 <MUIDataTable
                   title={"Data Kehadiran"}
                   data={dataHadir}
                   columns={columnsHadir}
+                  options={options}
+                />
+              )}
+              {this.state.isSudahPulang == "izin" && (
+                <MUIDataTable
+                  title={"Data Izin"}
+                  data={dataIzib}
+                  columns={columnsIzin}
                   options={options}
                 />
               )}
