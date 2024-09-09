@@ -26,6 +26,7 @@ const Pulang = () => {
     jamKeluarShift: "",
     durasi: 0,
     telat: 0,
+    tanggalAbsen: "",
     dendaTelat: 0,
     isPindahKlinik: 1,
     lembur: 0,
@@ -59,6 +60,7 @@ const Pulang = () => {
           jamMasuk: data.jam_masuk,
           jamKeluar: data.jam_keluar,
           jamKeluarShift: data.jam_keluar_shift,
+          tanggalAbsen: data.tanggal,
           durasi: data.durasi,
           telat: data.telat,
           dendaTelat: data.denda_telat,
@@ -90,10 +92,16 @@ const Pulang = () => {
 
   const handlePulang = (e) => {
     e.preventDefault();
+    console.log(state.tanggal);
+    console.log(state.tanggalAbsen, "absen");
     const jamPulang = getCurrentTime();
-    const durasi = hitungSelisihMenit(jamPulang, state.jamKeluarShift);
-    if (durasi > 5) {
-      setState((prevState) => ({ ...prevState, isIzin: true }));
+    if (state.tanggalAbsen == state.tanggal) {
+      const durasi = hitungSelisihMenit(jamPulang, state.jamKeluarShift);
+      if (durasi > 5) {
+        setState((prevState) => ({ ...prevState, isIzin: true }));
+      } else {
+        handleSubmit();
+      }
     } else {
       handleSubmit();
     }
